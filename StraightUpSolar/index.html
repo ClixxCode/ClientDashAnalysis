@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midwest Solar Market: Competitive Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutral with Solar Accent -->
+    <!-- Application Structure Plan: A single-page dashboard design was chosen to facilitate direct comparison, which is the core task for a competitive analysis. The structure flows from a high-level overview to granular details: 1) A main dashboard for quick, multi-competitor comparison using a central chart and key insight cards. 2) A 'Deep Dive' section with a tabbed interface to explore each company's profile without overwhelming the user. 3) A final 'Strategic Takeaways' section to synthesize the findings for the client, Straight Up Solar. This top-down approach allows users to either get a quick summary or investigate thoroughly, making it more usable than a linear report. -->
+    <!-- Visualization & Content Choices: Report Info: Company reputation scores (Google, BBB, etc.). Goal: Compare. Viz: Bar Chart (Chart.js/Canvas). Interaction: Tooltips on hover. Justification: Bar charts are excellent for direct, unambiguous comparison of quantitative values across multiple categories (companies). Report Info: Customer sentiment (positive/negative themes). Goal: Inform. Presentation: Styled HTML lists with icons (👍/👎). Justification: This provides a quick, scannable summary of qualitative feedback that is more digestible than paragraphs of text. Report Info: Company attributes (In-House Team, Warranty). Goal: Organize. Presentation: HTML "tags" with icons. Justification: Tags allow for quick visual identification of key features. Report Info: Strategic conclusions. Goal: Synthesize. Presentation: Styled HTML cards. Justification: Cards break down complex strategic points into focused, easy-to-read segments. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .detail-chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 250px;
+            max-height: 35vh;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #f59e0b; /* amber-500 */
+        }
+        .tab.active {
+            border-color: #f59e0b; /* amber-500 */
+            color: #f59e0b;
+            font-weight: 600;
+        }
+        .tab {
+            transition: all 0.3s;
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-slate-800">
+                <span class="text-amber-500">☀️</span> Midwest Solar Analysis
+            </h1>
+            <div class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                <a href="#dashboard" class="nav-link text-slate-600">Dashboard</a>
+                <a href="#deep-dive" class="nav-link text-slate-600">Competitor Deep Dive</a>
+                <a href="#strategy" class="nav-link text-slate-600">Strategic Takeaways</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-white border border-slate-300 rounded-md p-2 text-sm">
+                    <option value="#dashboard">Dashboard</option>
+                    <option value="#deep-dive">Deep Dive</option>
+                    <option value="#strategy">Strategy</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <section id="dashboard" class="mb-16 md:mb-24 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Market At-a-Glance</h2>
+            <p class="max-w-3xl mx-auto text-slate-600 mb-10">
+                This dashboard provides a high-level overview of the competitive landscape for Straight Up Solar. Compare key players based on overall reputation and explore major market trends.
+            </p>
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                <h3 class="text-xl font-semibold text-slate-800 mb-4">Overall Reputation Score Comparison</h3>
+                <div class="chart-container">
+                    <canvas id="reputationChart"></canvas>
+                </div>
+                <p class="text-xs text-slate-500 mt-4">Reputation score is an aggregated metric based on Google, BBB, and EnergySage ratings where available.</p>
+            </div>
+        </section>
+
+        <section id="deep-dive" class="mb-16 md:mb-24">
+            <div class="text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Competitor Deep Dive</h2>
+                <p class="max-w-3xl mx-auto text-slate-600 mb-10">
+                    Select a company to explore their detailed profile, including service offerings, customer sentiment, and strategic positioning. This interactive section allows for a direct comparison of each competitor's strengths and weaknesses.
+                </p>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8 border-b border-slate-200">
+            </div>
+
+            <div id="competitor-details-content" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg transition-opacity duration-500">
+            </div>
+        </section>
+
+        <section id="strategy" class="text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Strategic Takeaways for Straight Up Solar</h2>
+            <p class="max-w-3xl mx-auto text-slate-600 mb-10">
+                Based on the competitive analysis, here are the key strategic opportunities and threats for Straight Up Solar. The focus should be on leveraging unique strengths while mitigating risks posed by competitors.
+            </p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-lg text-left">
+                    <h3 class="text-2xl font-semibold text-emerald-600 mb-4">Key Opportunities for Straight Up Solar 🚀</h3>
+                    <ul class="space-y-4 text-slate-600">
+                        <li class="flex items-start">
+                            <span class="text-emerald-500 mr-3 mt-1">✔</span>
+                            <div>
+                                <strong class="text-slate-800">Leverage B-Corp Certification:</strong> This is a powerful, verifiable differentiator. Actively market it to attract customers who value ethical and sustainable business practices, setting Straight Up Solar apart from price-focused competitors.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-emerald-500 mr-3 mt-1">✔</span>
+                            <div>
+                                <strong class="text-slate-800">Highlight Operational Excellence:</strong> Since "in-house teams" are a common claim, prove superiority through case studies on project management, transparent communication, and exceptional post-installation support, where competitors like Route 66 Solar and ARC Solar show weaknesses.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-emerald-500 mr-3 mt-1">✔</span>
+                            <div>
+                                <strong class="text-slate-800">Counter Price-Based Competition with Value:</strong> Educate consumers on the Total Cost of Ownership, emphasizing long-term reliability, robust warranties, and the peace of mind that comes from a high-quality, ethically-driven installation, especially against aggressive marketers like SunSent.
+                            </div>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="text-emerald-500 mr-3 mt-1">✔</span>
+                            <div>
+                                <strong class="text-slate-800">Exploit Competitor Weaknesses:</strong> Target the trust gap created by competitors with inconsistent claims (e.g., Sun Solar's contradictory "in-house" claims). Emphasize Straight Up Solar's reliability, transparency, and verifiable customer satisfaction in all marketing.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-lg text-left">
+                    <h3 class="text-2xl font-semibold text-rose-600 mb-4">Potential Threats to Straight Up Solar ⚠️</h3>
+                    <ul class="space-y-4 text-slate-600">
+                        <li class="flex items-start">
+                            <span class="text-rose-500 mr-3 mt-1">❗</span>
+                            <div>
+                                <strong class="text-slate-800">Aggressive Price & Speed Competition:</strong> Companies like SunSent are targeting price-sensitive customers with aggressive offers and fast installation times. This could erode Straight Up Solar's market share if its long-term value proposition isn't communicated effectively.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-rose-500 mr-3 mt-1">❗</span>
+                            <div>
+                                <strong class="text-slate-800">"Good Enough" Competitors:</strong> Companies with generally positive reviews and similar core offerings (e.g., Route 66, New Prairie) create a crowded market where Straight Up Solar's differentiation on quality and service needs to be consistently highlighted.
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-rose-500 mr-3 mt-1">❗</span>
+                            <div>
+                                <strong class="text-slate-800">Marketplace Commoditization:</strong> The common claim of "in-house teams" and "warranties" can make it difficult for customers to perceive true differences in quality, potentially leading to price being the primary decision factor if Straight Up Solar doesn't clearly articulate its superior execution.
+                            </div>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="text-rose-500 mr-3 mt-1">❗</span>
+                            <div>
+                                <strong class="text-slate-800">Diversified Service Offerings:</strong> Competitors like ARC (electrical) and SunSent (roofing) can leverage cross-selling opportunities, appealing to customers looking for a single contractor for multiple needs. Straight Up Solar should emphasize its specialized solar expertise.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 mt-16 md:mt-24">
+        <div class="container mx-auto px-6 py-8 text-center text-sm">
+            <p>&copy; 2025 Competitive Analysis. For internal strategic use by Straight Up Solar.</p>
+            <p class="mt-2">This is an interactive visualization based on publicly available data and should not be considered financial advice.</p>
+        </div>
+    </footer>
+
+    <script>
+        const appData = {
+            companies: [
+                {
+                    id: 'straight-up-solar',
+                    name: 'Straight Up Solar',
+                    logo: '☀️',
+                    reputation: 4.7,
+                    ratings: [
+                        { source: 'Google', score: 4.9 },
+                        { source: 'Birdeye', score: 4.7 },
+                        { source: 'Angi', score: 4.6 },
+                        { source: 'BBB', score: 5.0 }
+                    ],
+                    profile: 'Established in 2005, a highly-regarded EPC company with a strong focus on in-house expertise, quality, and community engagement. A certified B-Corp.',
+                    services: ['Residential & C&I', 'Battery Storage', 'Turn-key EPC', 'System Monitoring'],
+                    attributes: [
+                        { label: 'In-House Team', value: true },
+                        { label: 'Subcontracts?', value: false },
+                        { label: 'Warranty', value: '10+ Years & Lifetime Support' },
+                        { label: 'B-Corp Certified', value: true }
+                    ],
+                    sentiment: {
+                        positive: [
+                            'High-quality workmanship and professionalism',
+                            'Thorough and educational process',
+                            'Great communication and respectful teams',
+                            'Strong community involvement and ethical practices'
+                        ],
+                        negative: [
+                            'Isolated communication/responsiveness issues post-payment',
+                            'Project management challenges and delays reported',
+                            'Refusal to service systems not sold by them',
+                            'Some systems reportedly underperformed'
+                        ]
+                    },
+                    strategy: 'A powerful, verifiable differentiator is their B-Corp status. This, combined with their long history, builds immense trust. The key is to communicate this value effectively against competitors who focus solely on price.'
+                },
+                {
+                    id: 'route-66-solar',
+                    name: 'Route 66 Solar',
+                    logo: '🛣️',
+                    reputation: 4.5,
+                    ratings: [
+                        { source: 'EcoWatch', score: 4.9 },
+                        { source: 'BBB', score: 5.0 }
+                    ],
+                    profile: 'A 100% local, family-owned company based in Springfield, IL. They strongly emphasize their use of in-house, IBEW-certified crews and a no-subcontracting policy.',
+                    services: ['Residential & C&I', 'System Inspections', 'Removal/Re-installation'],
+                     attributes: [
+                        { label: 'In-House Team', value: true },
+                        { label: 'Subcontracts?', value: false },
+                        { label: 'Warranty', value: '25-Year Workmanship' },
+                        { label: 'IBEW Crews', value: true }
+                    ],
+                    sentiment: {
+                        positive: [
+                            'Knowledgeable, transparent, and friendly team',
+                            'Timely and efficient installations',
+                            'Meticulous attention to detail',
+                            'Helpful with paperwork and financing'
+                        ],
+                        negative: [
+                            'Missed appointments and delays reported',
+                            'Lack of timely communication in some cases',
+                            'Limited customer insight on long-term support',
+                            'Inconsistent project management'
+                        ]
+                    },
+                    strategy: 'Their "in-house IBEW crew" claim is a strong trust signal, but it\'s undermined by reports of communication and scheduling issues. This shows that simply being "in-house" isn\'t enough; execution is key.'
+                },
+                {
+                    id: 'sunsent',
+                    name: 'SunSent',
+                    logo: '🌇',
+                    reputation: 4.9,
+                    ratings: [
+                        { source: 'EnergySage', score: 4.9 },
+                        { source: 'BBB', score: 5.0 }
+                    ],
+                    profile: 'A local company serving MO & IL that specializes in both solar and roofing services. They market aggressively with price-based incentives.',
+                    services: ['Residential Solar', 'Roofing (Repair & Replacement)', 'Battery & EV Chargers'],
+                     attributes: [
+                        { label: 'In-House Team', value: true },
+                        { label: 'Subcontracts?', value: false },
+                        { label: 'Warranty', value: 'Not specified' },
+                        { label: 'Roofing Services', value: true }
+                    ],
+                    sentiment: {
+                        positive: [
+                            'Outstanding customer service and communication',
+                            'Efficient installation and high quality',
+                            'Praised for "best overall price" and "shortest lead time"',
+                            'Excellent post-installation support'
+                        ],
+                        negative: [
+                            'No significant negative themes were identified in the research.'
+                        ]
+                    },
+                    strategy: 'A formidable competitor on price and speed. Their aggressive marketing ("We\'ll Pay Your Electric Bill!") directly targets cost-conscious consumers. Their overwhelmingly positive reviews suggest they are executing well.'
+                },
+                {
+                    id: 'arc-solar',
+                    name: 'ARC Solar',
+                    logo: '⚡',
+                    reputation: 4.4,
+                    ratings: [
+                        { source: 'Google', score: 4.9 },
+                        { source: 'EnergySage', score: 3.8 },
+                        { source: 'BBB', score: 5.0 }
+                    ],
+                    profile: 'A Midwest wholesale solar EPC that also offers a wide range of commercial and residential electrical services. They are a minority-owned business.',
+                    services: ['Residential & C&I', 'Extensive Electrical Services', 'Battery Storage', 'EV Charging'],
+                     attributes: [
+                        { label: 'In-House Team', value: true },
+                        { label: 'Subcontracts?', value: false },
+                        { label: 'Warranty', value: '25-Year Panel & Inverter' },
+                        { label: 'Minority-Owned', value: true }
+                    ],
+                    sentiment: {
+                        positive: [
+                            'Knowledgeable, practical, and transparent',
+                            'Good workmanship and attention to detail',
+                            'Clear communication and smooth process for many',
+                            'Praised for low-income family programs'
+                        ],
+                        negative: [
+                            '"Rocky" installation experiences reported',
+                            'Issues with scheduling, communication, and delays',
+                            'Problems with paperwork submission to utilities',
+                            'Potential brand confusion with "Helio"'
+                        ]
+                    },
+                    strategy: 'Their dual focus on solar and general electrical is a double-edged sword. It offers cross-selling opportunities but risks diluting focus. The mixed reviews suggest potential resource conflicts or operational strain.'
+                },
+                {
+                    id: 'sun-solar',
+                    name: 'Sun Solar',
+                    logo: '🔥',
+                    reputation: 2.8,
+                    ratings: [
+                        { source: 'EnergySage', score: 3.0 },
+                        { source: 'Angi (Professionalism)', score: 2.0 },
+                        { source: 'BBB Complaints', score: 1.0 }
+                    ],
+                    profile: 'Claims to be the #1 residential installer in Missouri, offering a range of solutions including the Tesla Solar Roof. Reputation is severely damaged by a high volume of complaints.',
+                    services: ['Residential & C&I', 'Tesla Solar Roof & Powerwall', 'In-house Financing'],
+                     attributes: [
+                        { label: 'In-House Team', value: 'Contradicted' },
+                        { label: 'Subcontracts?', value: 'Yes (Reported by Customers)' },
+                        { label: 'Warranty', value: '30-Year (via Solar Insure)' },
+                        { label: 'Tesla Partner', value: true }
+                    ],
+                    sentiment: {
+                        positive: [
+                            'Some customers report significant savings',
+                            'Initial sales interactions can be positive',
+                            'Ease of system management for some'
+                        ],
+                        negative: [
+                            'High volume of BBB complaints (44 in 3 yrs)',
+                            'Accusations of "bait and switch" tactics',
+                            'Contradictory claims of "in-house" vs. 3rd party installers',
+                            'Unfinished work, unreliability, poor responsiveness'
+                        ]
+                    },
+                    strategy: 'Represents a significant trust gap in the market. Their disconnect between marketing promises and customer reality provides a clear opportunity for ethical competitors to highlight their own reliability and transparency.'
+                },
+                {
+                    id: 'new-prairie-solar',
+                    name: 'New Prairie Solar',
+                    logo: '🌾',
+                    reputation: 4.8,
+                    ratings: [
+                         { source: 'BBB', score: 5.0 }
+                    ],
+                    profile: 'A general contractor in Urbana-Champaign specializing in solar. Stemming from a construction company founded in 1988, they bring a strong background in green building.',
+                    services: ['Residential & C&I', 'Agricultural & Non-Profit', 'Energy Storage'],
+                     attributes: [
+                        { label: 'In-House Team', value: true },
+                        { label: 'Subcontracts?', value: false },
+                        { label: 'Warranty', value: 'Lifetime System Guarantee' },
+                        { label: 'Construction DNA', value: true }
+                    ],
+                    sentiment: {
+                        positive: [
+                            'High-quality workmanship and integrity',
+                            'Excellent communication and responsiveness',
+                            'Projects on time and on budget',
+                            'Avoids aggressive sales tactics; education-focused'
+                        ],
+                        negative: [
+                            'No significant negative themes were identified in the research.'
+                        ]
+                    },
+                    strategy: 'A strong, reputable local competitor. Their customer-centric, non-aggressive approach builds strong loyalty. They compete on quality and trust, similar to Straight Up Solar, making them a direct and respectable rival in their specific service area.'
+                }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const reputationChartCtx = document.getElementById('reputationChart').getContext('2d');
+            const competitorTabsContainer = document.querySelector('#deep-dive .flex-wrap');
+            const competitorDetailsContainer = document.getElementById('competitor-details-content');
+            let detailChart = null;
+
+            const sortedCompanies = [...appData.companies].sort((a, b) => b.reputation - a.reputation);
+
+            new Chart(reputationChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: sortedCompanies.map(c => c.name),
+                    datasets: [{
+                        label: 'Overall Reputation Score',
+                        data: sortedCompanies.map(c => c.reputation),
+                        backgroundColor: sortedCompanies.map(c => c.id === 'straight-up-solar' ? '#f59e0b' : '#38bdf8'), // amber-500, sky-500
+                        borderColor: sortedCompanies.map(c => c.id === 'straight-up-solar' ? '#b45309' : '#0ea5e9'), // amber-700, sky-600
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 5,
+                            grid: {
+                                color: '#e2e8f0' // slate-200
+                            },
+                            ticks: {
+                                color: '#475569' // slate-600
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#475569' // slate-600
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Reputation: ${context.raw.toFixed(1)} / 5.0`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            function createAttributeTag(attr) {
+                let icon = '';
+                let colorClass = '';
+
+                if (typeof attr.value === 'boolean') {
+                    icon = attr.value ? '✅' : '❌';
+                    colorClass = attr.value ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+                } else {
+                    icon = 'ℹ️';
+                    colorClass = 'bg-sky-100 text-sky-800';
+                }
+                
+                return `
+                    <div class="flex items-center p-2 rounded-lg ${colorClass}">
+                        <span class="mr-2">${icon}</span>
+                        <div class="text-sm">
+                            <p class="font-semibold">${attr.label}</p>
+                            ${typeof attr.value !== 'boolean' ? `<p>${attr.value}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderCompetitorDetails(companyId) {
+                const company = appData.companies.find(c => c.id === companyId);
+                const straightUpSolar = appData.companies.find(c => c.id === 'straight-up-solar');
+                if (!company || !straightUpSolar) return;
+
+                let comparisonSection = '';
+                if (company.id !== 'straight-up-solar') {
+                    let comparisonText = '';
+                    if (company.id === 'route-66-solar') {
+                        comparisonText = `While Route 66 Solar also emphasizes an "in-house team" like Straight Up Solar, their customer reviews indicate inconsistencies in communication and project management. Straight Up Solar can differentiate by highlighting its superior execution and consistent customer journey in these areas.`;
+                    } else if (company.id === 'sunsent') {
+                        comparisonText = `SunSent competes aggressively on price and speed, a direct contrast to Straight Up Solar's focus on long-term value and ethical practices. Straight Up Solar needs to clearly articulate the benefits of its B-Corp status and comprehensive support to justify its value proposition against SunSent's low-cost approach.`;
+                    } else if (company.id === 'arc-solar') {
+                        comparisonText = `ARC Solar's dual focus on solar and general electrical services offers diversified strengths, but also risks diluted focus. Straight Up Solar, with its exclusive solar specialization, can position itself as the dedicated expert, ensuring undivided attention to solar project quality and customer experience.`;
+                    } else if (company.id === 'sun-solar') {
+                        comparisonText = `Sun Solar's significant trust issues, including contradictory "in-house" claims and numerous complaints, present a clear opportunity for Straight Up Solar. Straight Up Solar can strongly emphasize its transparency, verifiable in-house operations, and consistent customer satisfaction to win over customers seeking reliability.`;
+                    } else if (company.id === 'new-prairie-solar') {
+                        comparisonText = `New Prairie Solar is a strong, reputable competitor, similar to Straight Up Solar in its focus on quality and customer trust. Straight Up Solar's B-Corp certification and broader regional presence can be key differentiators in direct competition, highlighting its commitment to ethical business practices and wider market reach.`;
+                    }
+
+                    comparisonSection = `
+                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mt-6">
+                            <h4 class="font-semibold text-lg text-blue-800 mb-2">How Straight Up Solar Compares 💡</h4>
+                            <p class="text-blue-900 text-sm">${comparisonText}</p>
+                        </div>
+                    `;
+                }
+
+                competitorDetailsContainer.innerHTML = `
+                    <div class="grid md:grid-cols-2 gap-8 items-start">
+                        <div>
+                            <div class="flex items-center mb-4">
+                                <span class="text-5xl mr-4">${company.logo}</span>
+                                <div>
+                                    <h3 class="text-2xl md:text-3xl font-bold text-slate-800">${company.name}</h3>
+                                    <p class="text-slate-600 mt-1">${company.profile}</p>
+                                </div>
+                            </div>
+                            
+                            <h4 class="font-semibold text-lg text-slate-700 mt-6 mb-3">Key Attributes</h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                ${company.attributes.map(createAttributeTag).join('')}
+                            </div>
+
+                            <h4 class="font-semibold text-lg text-slate-700 mt-6 mb-3">Services</h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${company.services.map(service => `<span class="bg-slate-100 text-slate-700 text-xs font-medium px-3 py-1 rounded-full">${service}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="grid lg:grid-cols-2 gap-6">
+                                <div class="bg-slate-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-lg text-slate-700 mb-3 text-center">Reputation Breakdown</h4>
+                                    <div class="detail-chart-container">
+                                        <canvas id="detailChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-lg text-slate-700 mb-3">Customer Sentiment</h4>
+                                    <div>
+                                        <h5 class="font-semibold text-emerald-600 mb-2">👍 Strengths</h5>
+                                        <ul class="list-disc list-inside text-sm space-y-1 text-slate-600">
+                                            ${company.sentiment.positive.map(item => `<li>${item}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                    <div class="mt-4">
+                                        <h5 class="font-semibold text-rose-600 mb-2">👎 Weaknesses</h5>
+                                        <ul class="list-disc list-inside text-sm space-y-1 text-slate-600">
+                                            ${company.sentiment.negative.map(item => `<li>${item}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-amber-50 border border-amber-200 p-4 rounded-lg mt-6">
+                                <h4 class="font-semibold text-lg text-amber-800 mb-2">Strategic Insight</h4>
+                                <p class="text-amber-900 text-sm">${company.strategy}</p>
+                            </div>
+                            ${comparisonSection}
+                        </div>
+                    </div>
+                `;
+
+                if (detailChart) {
+                    detailChart.destroy();
+                }
+                
+                if (company.ratings.length > 0) {
+                    const detailChartCtx = document.getElementById('detailChart').getContext('2d');
+                    detailChart = new Chart(detailChartCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: company.ratings.map(r => r.source),
+                            datasets: [{
+                                label: 'Rating',
+                                data: company.ratings.map(r => r.score),
+                                backgroundColor: '#38bdf8', // sky-500
+                                borderColor: '#0ea5e9', // sky-600
+                                borderWidth: 1,
+                                borderRadius: 4,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 5,
+                                    ticks: { color: '#475569' }
+                                },
+                                x: {
+                                    ticks: { color: '#475569' }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                } else {
+                     document.getElementById('detailChart').parentElement.innerHTML = '<div class="flex items-center justify-center h-full text-slate-500 text-sm">No specific rating data available.</div>';
+                }
+            }
+
+            appData.companies.forEach((company, index) => {
+                const tab = document.createElement('button');
+                tab.className = 'tab px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-amber-500';
+                tab.innerHTML = `<span class="mr-2">${company.logo}</span>${company.name}`;
+                tab.dataset.companyId = company.id;
+                if (index === 0) {
+                    tab.classList.add('active');
+                }
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    renderCompetitorDetails(company.id);
+                });
+                competitorTabsContainer.appendChild(tab);
+            });
+
+            renderCompetitorDetails(appData.companies[0].id);
+            
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (e) => {
+                window.location.hash = e.target.value;
+            });
+        });
+    </script>
+</body>
+</html>

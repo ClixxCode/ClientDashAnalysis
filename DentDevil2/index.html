@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competitive Analysis: St. Louis Dent Repair Market</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application is designed as an interactive dashboard, moving away from the report's linear structure. The core is a tab-based navigation system allowing users to switch between a high-level 'Comparative Analysis' view and detailed deep-dives into each competitor ('Dent Devil', 'Dents Express', etc.). This structure was chosen because the primary goal for the user (a strategist at Dent Devil) is to compare and contrast, not just read. The dashboard starts with visual charts for quick insights (feature comparison, reputation), followed by detailed profiles. A final, collapsible 'Strategic Insights' section provides the SWOT and recommendations, ensuring the user first understands the 'what' (data) before exploring the 'so what' (strategy). This non-linear flow empowers the user to explore based on their immediate questions, making the data more consumable and actionable. -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Feature Comparison Matrix -> Goal: Compare -> Viz: Interactive HTML Table -> Interaction: Row hover highlights -> Justification: Direct, clear data presentation.
+        - Report Info: Convenience Factors (Mobile Service, Weekend Hours, Free Estimates) -> Goal: Compare -> Viz: HTML Table with Yes/No/Partial indicators -> Interaction: N/A -> Justification: A direct table with clear indicators is the most straightforward and least confusing way to present binary/ternary convenience data, directly addressing user feedback.
+        - Report Info: SWOT Analysis -> Goal: Inform/Strategize -> Viz: Styled HTML Grid with Icons -> Interaction: Contained in a collapsible accordion -> Justification: Icons improve scannability, and the accordion keeps the main dashboard clean.
+        - Report Info: Individual Pros & Cons -> Goal: Inform -> Viz: Two-column styled lists -> Interaction: N/A -> Justification: Clear, direct presentation of qualitative analysis.
+        - Library/Method: All visualizations use structured HTML/Tailwind. Chart.js is no longer used for convenience factors but remains available if other charts are added. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7;
+            color: #333333;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+        .nav-button.active {
+            border-bottom-color: #4A7C59;
+            color: #4A7C59;
+            font-weight: 600;
+        }
+        /* Chart container styles are no longer strictly needed for convenience factors but kept for consistency if charts are reintroduced for other data */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 250px;
+            max-height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border: 1px solid #E5E7EB;
+        }
+        .pro-con-card ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .pro-con-card li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+        .pro-con-card li::before {
+            flex-shrink: 0;
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.75rem;
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+        }
+        .pro-card li::before {
+            content: '+';
+            background-color: #4A7C59;
+        }
+        .con-card li::before {
+            content: '-';
+            background-color: #D9534F;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="min-h-screen">
+        <header class="bg-white shadow-sm sticky top-0 z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800">St. Louis Auto Dent Repair</h1>
+                <p class="text-sm md:text-base text-gray-500 mt-1">An Interactive Competitive Landscape Analysis for Dent Devil</p>
+            </div>
+        </header>
+
+        <nav class="bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-center items-center space-x-4 md:space-x-8">
+                    <button class="nav-button py-4 px-2 md:px-4 text-sm md:text-base font-medium text-gray-500 hover:text-gray-700" data-view="comparison">Comparative Analysis</button>
+                    <button class="nav-button py-4 px-2 md:px-4 text-sm md:text-base font-medium text-gray-500 hover:text-gray-700" data-view="dent-devil">Dent Devil (Client)</button>
+                    <button class="nav-button py-4 px-2 md:px-4 text-sm md:text-base font-medium text-gray-500 hover:text-gray-700" data-view="dents-express">Dents Express</button>
+                    <button class="nav-button py-4 px-2 md:px-4 text-sm md:text-base font-medium text-gray-500 hover:text-gray-700" data-view="stl-dent-co">STL Dent Co</button>
+                    <button class="nav-button py-4 px-2 md:px-4 text-sm md:text-base font-medium text-gray-500 hover:text-gray-700" data-view="spirit-west">Spirit West</button>
+                </div>
+            </div>
+        </nav>
+
+        <main id="main-content" class="py-8 md:py-12">
+        </main>
+
+    </div>
+
+    <script>
+        const competitorData = {
+            'dent-devil': {
+                name: "Dent Devil",
+                focus: "PDR, Hail Damage, Clear Bra",
+                usp: "\"Premier PDR,\" preserves original paint, insurance appraisal service.",
+                locations: 2,
+                mobile: true,
+                freeEstimates: "Partial",
+                insuranceHandling: true,
+                weekendHours: false,
+                bbb: "A+",
+                pros: [
+                    "Strong PDR specialization appeals to those prioritizing factory finish.",
+                    "Proactive insurance support simplifies a complex process for customers.",
+                    "Quick repairs and mobile service cater to busy schedules.",
+                    "Detailed FAQs and A+ BBB rating build initial trust."
+                ],
+                cons: [
+                    "Fee for comprehensive hail estimates ($250, though refundable) might deter some.",
+                    "Limited weekend hours (closed Sat/Sun) is a key inconvenience.",
+                    "A BBB complaint noted communication issues during a long repair."
+                ]
+            },
+            'dents-express': {
+                name: "Dents Express STL",
+                focus: "PDR, Minor Collision, Hail Damage",
+                usp: "20+ years experience, ARC-certified, handles Teslas/Rivians.",
+                locations: 2,
+                mobile: true,
+                freeEstimates: "Yes",
+                insuranceHandling: true,
+                weekendHours: true,
+                bbb: "A+",
+                pros: [
+                    "Experienced, certified technicians, including for modern EVs.",
+                    "Comprehensive insurance support reduces customer burden.",
+                    "Walk-in estimates, Saturday appointments, and rental car coordination offer high convenience.",
+                    "Strong on-site testimonials and A+ BBB rating build confidence."
+                ],
+                cons: [
+                    "Significant website gaps (placeholder text) create friction and require prospects to call for basic info.",
+                    "Review summaries noted minor issues with interior touch-ups."
+                ]
+            },
+            'stl-dent-co': {
+                name: "STL Dent Co",
+                focus: "PDR, Hail Damage, Minor Body Repairs",
+                usp: "\"Eliminates any sign of damage,\" 19+ years PDR experience, mobile service.",
+                locations: 2,
+                mobile: true,
+                freeEstimates: "Yes",
+                insuranceHandling: true,
+                weekendHours: false,
+                bbb: "Conflict",
+                pros: [
+                    "Deep PDR experience with a commitment to a higher quality standard.",
+                    "Offers a wide range of services and provides mobile service with flexible appointments.",
+                    "Transparently explains PDR methods and potential risks, building trust."
+                ],
+                cons: [
+                    "\"One-Stop Shop\" messaging might dilute their PDR specialization.",
+                    "Significant inconsistency regarding BBB accreditation undermines trust.",
+                    "No weekend hours."
+                ]
+            },
+            'spirit-west': {
+                name: "Spirit West Rapid Refinish",
+                focus: "Minor Collision, Paint, PDR",
+                usp: "\"QUALITY WITHOUT COMPROMISE,\" top-tier certifications (Volvo, BMW, I-CAR), FREE pick-up/drop-off.",
+                locations: 1,
+                mobile: false,
+                freeEstimates: "Yes",
+                insuranceHandling: true,
+                weekendHours: false,
+                bbb: "N/A",
+                pros: [
+                    "Unmatched convenience with free car pick-up/drop-off and rental assistance.",
+                    "High-level certifications and a \"Quality without Compromise\" motto inspire confidence.",
+                    "Offers a broad solution from minor to major repairs via its parent company.",
+                    "Strong online tools (scheduling, estimates) and a lifetime warranty."
+                ],
+                cons: [
+                    "Primary focus on broader collision repair may deter prospects seeking a pure PDR specialist.",
+                    "No mobile service (though countered by pick-up service).",
+                    "No weekend hours."
+                ]
+            }
+        };
+
+        const strategicData = {
+            swot: {
+                strengths: ["PDR Specialization & Quality", "Proactive Insurance Support", "Operational Efficiency", "Strong BBB Trust Signal"],
+                weaknesses: ["Limited Weekend Accessibility", "Identified Communication Gaps", "Lack of Transparent Review Data", "Fee for Comprehensive Estimates"],
+                opportunities: ["Enhance Online Review Transparency", "Improve Communication Protocols", "Expand Weekend Hours", "Leverage PDR Specialization with Content"],
+                threats: ["Competitors' Superior Convenience", "Potential for Competitor Website Improvement", "Brand Confusion from Competitors", "Market Price Competition"]
+            },
+            recommendations: [
+                { title: "Enhance Online Reputation & Transparency", detail: "Integrate live Google/Yelp review feeds on the website to provide immediate, trusted social proof and reduce prospect friction." },
+                { title: "Optimize Website Content & User Experience", detail: "Develop more video content showcasing the PDR process and before-and-after transformations to visually prove expertise." },
+                { title: "Evaluate and Promote Convenience Services", detail: "Aggressively promote existing convenience offerings (like mobile service) and evaluate the feasibility of expanding services to compete with market leaders." },
+                { title: "Reinforce PDR Specialization", detail: "Continuously reinforce Dent Devil’s identity as the premier PDR specialist to stand out against general collision centers." }
+            ]
+        };
+        
+        const mainContent = document.getElementById('main-content');
+        const navButtons = document.querySelectorAll('.nav-button');
+        let currentView = 'comparison';
+        let charts = {}; // Keep charts object, but it will be empty for convenience section now
+
+        function render() {
+            navButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === currentView);
+            });
+
+            mainContent.innerHTML = '';
+            if (currentView === 'comparison') {
+                mainContent.innerHTML = getComparisonHTML();
+                // Only initialize SWOT toggle, no charts for convenience now
+                initComparisonSectionInteractions();
+            } else {
+                mainContent.innerHTML = getCompetitorDetailHTML(currentView);
+            }
+        }
+
+        function getComparisonHTML() {
+            return `
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+                    <section id="feature-comparison">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Feature Comparison</h2>
+                            <p class="mt-2 max-w-3xl mx-auto text-base text-gray-500">This section provides a side-by-side look at the core offerings and policies of each competitor. Use this matrix to quickly identify key differences in business models, from primary service focus to customer-facing policies like estimates and weekend availability.</p>
+                        </div>
+                        <div class="card p-4 sm:p-6 overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Feature</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Dent Devil</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Dents Express</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">STL Dent Co</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Spirit West</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${getFeatureTableRow('Primary Focus', 'focus')}
+                                    ${getFeatureTableRow('Key Differentiator (USP)', 'usp')}
+                                    ${getFeatureTableRow('BBB Rating', 'bbb')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                    
+                    <section id="convenience-factors-table">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Customer Convenience Factors</h2>
+                            <p class="mt-2 max-w-3xl mx-auto text-base text-gray-500">This table highlights key convenience offerings for each competitor, showing at a glance who provides mobile service, weekend hours, and free estimates.</p>
+                        </div>
+                        <div class="card p-4 sm:p-6 overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Convenience Factor</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Dent Devil</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Dents Express</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">STL Dent Co</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Spirit West</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${getConvenienceFactorRow('Mobile Service Availability', 'mobile')}
+                                    ${getConvenienceFactorRow('Weekend Hours Offered', 'weekendHours')}
+                                    ${getConvenienceFactorRow('Free Estimates Provided', 'freeEstimates')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section id="strategic-insights">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Strategic Insights for Dent Devil</h2>
+                            <p class="mt-2 max-w-3xl mx-auto text-base text-gray-500">This final section synthesizes the competitive data into a strategic framework for Dent Devil. It includes a SWOT analysis to frame the market position and provides actionable recommendations to enhance competitive strengths and address weaknesses.</p>
+                        </div>
+                        <div class="card">
+                           <button id="toggle-swot" class="w-full text-left p-4 sm:p-6 bg-gray-50 hover:bg-gray-100 rounded-t-xl border-b border-gray-200">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-lg font-semibold text-gray-700">View SWOT Analysis & Recommendations</h3>
+                                    <span id="swot-arrow" class="transform transition-transform duration-300">▼</span>
+                                </div>
+                            </button>
+                            <div id="swot-content" class="hidden p-4 sm:p-6 space-y-8">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    ${getSwotCard('Strengths', strategicData.swot.strengths, '👍', 'text-green-700')}
+                                    ${getSwotCard('Weaknesses', strategicData.swot.weaknesses, '👎', 'text-red-700')}
+                                    ${getSwotCard('Opportunities', strategicData.swot.opportunities, '💡', 'text-blue-700')}
+                                    ${getSwotCard('Threats', strategicData.swot.threats, '⚠️', 'text-yellow-700')}
+                                </div>
+                                <div>
+                                    <h4 class="text-xl font-semibold mb-4 text-gray-800">Actionable Recommendations</h4>
+                                    <div class="space-y-4">
+                                        ${strategicData.recommendations.map(rec => `
+                                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                <p class="font-semibold text-gray-700">${rec.title}</p>
+                                                <p class="text-gray-600">${rec.detail}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            `;
+        }
+
+        function getFeatureTableRow(label, key) {
+            const data = Object.values(competitorData);
+            return `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">${label}</td>
+                    ${data.map(c => `
+                        <td class="px-4 py-4 text-sm text-gray-600 text-center whitespace-normal">
+                            ${c[key]}
+                        </td>
+                    `).join('')}
+                </tr>
+            `;
+        }
+
+        function getConvenienceFactorRow(label, key) {
+            const check = '<span class="text-green-500 text-2xl">✓</span>';
+            const cross = '<span class="text-red-500 text-2xl">✗</span>';
+            const data = Object.values(competitorData);
+            return `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">${label}</td>
+                    ${data.map(c => {
+                        let displayValue;
+                        if (key === 'freeEstimates') {
+                            displayValue = c[key] === "Yes" ? check : (c[key] === "Partial" ? "Partial" : cross);
+                        } else {
+                            displayValue = c[key] ? check : cross;
+                        }
+                        return `
+                            <td class="px-4 py-4 text-sm text-gray-600 text-center whitespace-normal">
+                                ${displayValue}
+                            </td>
+                        `;
+                    }).join('')}
+                </tr>
+            `;
+        }
+
+        function getSwotCard(title, items, icon, colorClass) {
+            return `
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="text-lg font-semibold mb-3 flex items-center ${colorClass}">
+                        <span class="mr-2 text-xl">${icon}</span> ${title}
+                    </h4>
+                    <ul class="space-y-2 list-disc list-inside text-gray-600">
+                        ${items.map(item => `<li>${item}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        function getCompetitorDetailHTML(view) {
+            const data = competitorData[view];
+            return `
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-10">
+                        <h2 class="text-3xl font-bold text-gray-800">${data.name}</h2>
+                        <p class="mt-2 text-lg text-gray-500">${data.focus}</p>
+                    </div>
+                    <div class="card p-6 md:p-8">
+                        <div class="space-y-8">
+                             <div>
+                                <h3 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">At a Glance</h3>
+                                <ul class="space-y-2 text-gray-700">
+                                    <li><span class="font-semibold">Key Differentiator:</span> ${data.usp}</li>
+                                    <li><span class="font-semibold">Locations:</span> ${data.locations}</li>
+                                    <li><span class="font-semibold">BBB Rating:</span> ${data.bbb}</li>
+                                </ul>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pro-con-card">
+                                <div class="pro-card">
+                                    <h4 class="text-lg font-semibold text-green-700 mb-3">Pros (From a Prospect's View)</h4>
+                                    <ul>${data.pros.map(p => `<li>${p}</li>`).join('')}</ul>
+                                </div>
+                                <div class="con-card">
+                                    <h4 class="text-lg font-semibold text-red-700 mb-3">Cons (From a Prospect's View)</h4>
+                                    <ul>${data.cons.map(c => `<li>${c}</li>`).join('')}</ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initComparisonSectionInteractions() {
+            // This function now only handles the SWOT toggle, as convenience charts are removed.
+            const swotToggle = document.getElementById('toggle-swot');
+            const swotContent = document.getElementById('swot-content');
+            const swotArrow = document.getElementById('swot-arrow');
+            if(swotToggle) {
+                swotToggle.addEventListener('click', () => {
+                    swotContent.classList.toggle('hidden');
+                    swotArrow.classList.toggle('rotate-180');
+                });
+            }
+        }
+
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentView = btn.dataset.view;
+                render();
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', render);
+
+    </script>
+</body>
+</html>
