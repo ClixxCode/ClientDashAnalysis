@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Old Kinderhook | Competitive Analysis Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 50vh;
+            max-height: 500px;
+        }
+        .nav-tab {
+            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 4px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .nav-tab.active {
+            color: #00429d;
+            border-bottom-color: #00429d;
+        }
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
+        .competitor-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .competitor-btn.active {
+            background-color: #00429d;
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(0, 66, 157, 0.39);
+        }
+        .swot-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .swot-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .swot-card {
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .swot-card h3 {
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .swot-icon {
+            margin-right: 0.75rem;
+            font-size: 1.5rem;
+        }
+        .recommendation-toggle {
+            cursor: pointer;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            transition: background-color 0.2s;
+        }
+        .recommendation-toggle:hover {
+            background-color: #f9fafb;
+        }
+        .recommendation-content {
+            display: none;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            border-radius: 0 0 0.5rem 0.5rem;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-6">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-[#00429d]">Competitive Analysis Dashboard</h1>
+            <p class="text-md text-gray-600">An interactive tool for Old Kinderhook</p>
+        </header>
+
+        <nav class="flex justify-center border-b border-gray-200 mb-8">
+            <div id="dashboard-tab" class="nav-tab active" onclick="switchView('dashboard')">Dashboard</div>
+            <div id="profiles-tab" class="nav-tab" onclick="switchView('profiles')">Competitor Profiles</div>
+            <div id="recommendations-tab" class="nav-tab" onclick="switchView('recommendations')">Recommendations</div>
+        </nav>
+
+        <main>
+            <div id="dashboard-view" class="view active">
+                <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h2 class="text-xl font-bold text-center mb-1 text-[#00429d]">Market Focus Comparison</h2>
+                        <p class="text-sm text-gray-500 text-center mb-4">How competitors position themselves across key market segments.</p>
+                        <div class="chart-container h-[45vh]">
+                            <canvas id="featureRadarChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h2 class="text-xl font-bold text-center mb-1 text-[#00429d]">Guest Satisfaction vs. Market Position</h2>
+                        <p class="text-sm text-gray-500 text-center mb-4">Bubble size represents approximate room count. X-axis shows target audience.</p>
+                        <div class="chart-container h-[45vh]">
+                            <canvas id="marketBubbleChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
+                        <h2 class="text-xl font-bold text-center mb-1 text-[#00429d]">Digital Presence Scorecard</h2>
+                        <p class="text-sm text-gray-500 text-center mb-4">A qualitative rating of each competitor's website effectiveness.</p>
+                        <div class="chart-container h-[40vh]">
+                            <canvas id="digitalPresenceBarChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="profiles-view" class="view">
+                <div class="text-center mb-8">
+                    <div id="competitor-filter" class="inline-flex flex-wrap justify-center rounded-md shadow-sm bg-white p-1" role="group">
+                    </div>
+                </div>
+                <div id="competitor-profile-content">
+                </div>
+            </div>
+
+            <div id="recommendations-view" class="view">
+                 <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-center mb-4 text-[#00429d]">Strategic SWOT Analysis</h2>
+                    <div class="swot-grid max-w-5xl mx-auto">
+                        <div class="swot-card border-l-4 border-green-500">
+                            <h3><span class="swot-icon">👍</span>Strengths</h3>
+                            <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                <li>**Niche Targeting:** Camden's success proves the power of focusing on a specific demographic (upscale party scene).</li>
+                                <li>**Operational Excellence:** Lake Breeze's high satisfaction demonstrates the value of flawlessly delivering on a simple promise.</li>
+                                <li>**Brand Power:** Margaritaville leverages a strong national brand to attract a large family audience.</li>
+                            </ul>
+                        </div>
+                        <div class="swot-card border-l-4 border-red-500">
+                            <h3><span class="swot-icon">👎</span>Weaknesses</h3>
+                            <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                <li>**Product Dissonance:** The Lodge suffers from a major gap between its luxury marketing and its dated room quality.</li>
+                                <li>**Misleading Marketing:** The Resort at LOZ creates deep customer distrust with deceptive website imagery.</li>
+                                <li>**Ancillary Costs:** Margaritaville's "nickel and dime" approach harms its value perception.</li>
+                            </ul>
+                        </div>
+                        <div class="swot-card border-l-4 border-blue-500">
+                            <h3><span class="swot-icon">💡</span>Opportunities</h3>
+                            <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                <li>**The "Quiet Quality" Gap:** A clear market opening exists for a resort offering premium amenities AND a peaceful atmosphere.</li>
+                                <li>**Capitalize on Competitor Failures:** Directly target guest frustrations with outdated rooms and lack of basic amenities.</li>
+                                <li>**Build Digital Trust:** Become the most transparent brand online by featuring uncensored reviews and video tours.</li>
+                            </ul>
+                        </div>
+                        <div class="swot-card border-l-4 border-yellow-500">
+                            <h3><span class="swot-icon">⚠️</span>Threats</h3>
+                            <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                <li>**Price Sensitivity:** While some niches have pricing power, the broader market is still value-conscious.</li>
+                                <li>**Brand Loyalty:** Margaritaville's brand loyalty is strong enough to overlook some product flaws, capturing the mass family market.</li>
+                                <li>**Shifting Tastes:** The demand for experiential travel continues to grow, requiring constant innovation.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                 <section>
+                    <h2 class="text-2xl font-bold text-center my-6 text-[#00429d]">Actionable Recommendations</h2>
+                    <div class="space-y-4 max-w-4xl mx-auto">
+                        <div class="recommendation-container">
+                            <div class="recommendation-toggle flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-[#00429d]">1. Define the Winning Position: "Refined Recreation & Modern Heritage"</h3>
+                                <span class="toggle-icon text-2xl font-light">+</span>
+                            </div>
+                            <div class="recommendation-content">
+                                <p class="text-gray-700">The market has a clear gap for a resort that combines premium amenities, modern high-quality accommodations, and a relaxing atmosphere. Old Kinderhook should own this space. This positioning leverages existing strengths in golf ("Heritage") while promising upscale tranquility ("Refined Recreation") and contemporary lodging ("Modern"). This directly targets discerning travelers disappointed by The Lodge and repelled by the noise of Camden and Margaritaville.</p>
+                            </div>
+                        </div>
+                        <div class="recommendation-container">
+                            <div class="recommendation-toggle flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-[#00429d]">2. Launch Marketing that Directly Addresses Competitor Flaws</h3>
+                                <span class="toggle-icon text-2xl font-light">+</span>
+                            </div>
+                            <div class="recommendation-content">
+                                <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                    <li><strong>Counter The Lodge:</strong> Use messaging like "Timeless Tradition, Modern Comforts." Heavily feature pristine, fully-equipped rooms in all marketing.</li>
+                                    <li><strong>Counter Camden:</strong> Use taglines like "Your Luxurious Lakeside Escape." Focus imagery on tranquility, sophisticated elegance, and serene moments.</li>
+                                    <li><strong>Counter Margaritaville:</strong> Position with the theme "An Elevated Experience." Highlight quality over quantity, fine dining, and a less crowded, more exclusive feel.</li>
+                                </ul>
+                            </div>
+                        </div>
+                         <div class="recommendation-container">
+                            <div class="recommendation-toggle flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-[#00429d]">3. Enhance Digital Trust and Transparency</h3>
+                                <span class="toggle-icon text-2xl font-light">+</span>
+                            </div>
+                            <div class="recommendation-content">
+                                <p class="text-gray-700">Competitors create distrust with misleading marketing. Turn this into an advantage. Revamp the website to feature a transparent, live feed of uncurated reviews from a source like Google. Invest in high-definition video tours of every room type to prove that the quality seen online is what's delivered, eliminating "bait-and-switch" anxiety.</p>
+                            </div>
+                        </div>
+                         <div class="recommendation-container">
+                            <div class="recommendation-toggle flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-[#00429d]">4. Prioritize Operational & Product Excellence</h3>
+                                <span class="toggle-icon text-2xl font-light">+</span>
+                            </div>
+                            <div class="recommendation-content">
+                                <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                    <li><strong>Conduct a Room Quality Audit:</strong> Ensure 100% of room inventory is flawless and equipped with modern standards (refrigerator, microwave/kitchenette, fast Wi-Fi). This is the #1 factor in justifying a premium price.</li>
+                                    <li><strong>Develop "Effortless Luxury" Packages:</strong> Counter the "nickel and dime" feeling by bundling lodging with golf, spa, dining, or boat rentals. This simplifies planning and enhances the premium feel.</li>
+                                    <li><strong>Leverage "Quiet" as an Amenity:</strong> Actively promote the resort as a peaceful retreat. Institute and communicate enforced quiet hours to attract the lucrative segment seeking an escape from noise.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const brilliantBlues = {
+            dark: '#00429d',
+            medium: '#4771b2',
+            light: '#7da8c9',
+            veryLight: '#abd0e0',
+            pale: '#d8eeef',
+            text: '#374151',
+            accentRed: '#dc3545',
+            accentYellow: '#ffc107',
+            accentGreen: '#28a745'
+        };
+
+        const competitorData = {
+            "The Lodge": {
+                tagline: "LIKE NO OTHER.",
+                positioning: "A historic, premier destination focused on tradition, family, golf, and spa-goers. Aims for an upscale, legacy experience.",
+                pros: ["Beautiful Location & Views", "Excellent Pools", "High-Quality Spa"],
+                cons: ["Outdated/Dirty Rooms", "Lacks In-Room Fridge/Microwave", "Inconsistent Service"],
+                reputation: { positive: 60, negative: 40 }
+            },
+            "Margaritaville": {
+                tagline: "Lake latitude and island attitude.",
+                positioning: "A branded entertainment hub selling an escapist lifestyle. Primarily targets families with a vast array of activities.",
+                pros: ["Abundant Activities", "Great for Families", "Friendly Staff"],
+                cons: ["Rooms Need Updates", "High Ancillary Costs", "Property is Too Large"],
+                reputation: { positive: 75, negative: 25 }
+            },
+            "The Resort": {
+                tagline: "A 1 stop shop for a wonderful getaway.",
+                positioning: "An entertainment venue with rooms attached, focused on nightlife. Suffers from misleading marketing and polarized reviews.",
+                pros: ["Fun Bar/Nightlife", "Friendly Staff", "Convenient Location"],
+                cons: ["Misleading Website", "Poor Room Quality", "No Direct Lake Access"],
+                reputation: { positive: 55, negative: 45 }
+            },
+            "Camden": {
+                tagline: "Voted #1 Resort on The Lake.",
+                positioning: "A masterclass in niche targeting, serving adults seeking an upscale party scene centered around its entertainment complex and marina.",
+                pros: ["Clean, Modern Rooms", "Fun Atmosphere/Pool", "Friendly Staff"],
+                cons: ["Extremely Loud Music", "Expensive Drinks", "Not for Relaxation"],
+                reputation: { positive: 90, negative: 10 }
+            },
+            "Lake Breeze": {
+                tagline: "Good old fashioned summer fun.",
+                positioning: "A traditional 'mom and pop' cabin resort focused on simplicity, cleanliness, and value. Promises and delivers an authentic lake experience.",
+                pros: ["Exceptional Staff", "Great Condition/Cleanliness", "Quiet & Relaxing"],
+                cons: ["(None Identified)"],
+                reputation: { positive: 98, negative: 2 }
+            }
+        };
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`${viewName}-view`).classList.add('active');
+            document.getElementById(`${viewName}-tab`).classList.add('active');
+        }
+
+        function selectCompetitor(name) {
+            document.querySelectorAll('.competitor-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.competitor-btn[data-name="${name}"]`).classList.add('active');
+            
+            const data = competitorData[name];
+            const contentEl = document.getElementById('competitor-profile-content');
+            
+            let prosList = data.pros.map(p => `<li class="flex items-start"><span class="text-green-500 mr-2">✓</span><span>${p}</span></li>`).join('');
+            let consList = data.cons.map(c => `<li class="flex items-start"><span class="text-red-500 mr-2">✗</span><span>${c}</span></li>`).join('');
+
+            contentEl.innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-[#00429d]">${name}</h2>
+                        <p class="text-md text-gray-500 italic">"${data.tagline}"</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2">
+                            <h3 class="font-semibold text-lg mb-2">Market Positioning</h3>
+                            <p class="text-gray-600 mb-4">${data.positioning}</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="font-semibold text-green-600 mb-2">Guest Positives</h4>
+                                    <ul class="space-y-1 text-gray-700">${prosList}</ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-red-600 mb-2">Guest Negatives</h4>
+                                    <ul class="space-y-1 text-gray-700">${consList}</ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-center">Reputation Breakdown</h3>
+                            <div class="h-48 w-48 mx-auto">
+                                <canvas id="reputationDonutChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            renderDonutChart(data.reputation);
+        }
+
+        function renderDonutChart(reputationData) {
+            new Chart(document.getElementById('reputationDonutChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive Themes', 'Negative Themes'],
+                    datasets: [{
+                        data: [reputationData.positive, reputationData.negative],
+                        backgroundColor: [brilliantBlues.accentGreen, brilliantBlues.accentRed],
+                        borderColor: '#ffffff',
+                        borderWidth: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterContainer = document.getElementById('competitor-filter');
+            Object.keys(competitorData).forEach((name, index) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'competitor-btn py-2 px-4 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700';
+                if (index === 0) btn.classList.add('rounded-l-lg');
+                if (index === Object.keys(competitorData).length - 1) btn.classList.add('rounded-r-lg');
+                 if (index > 0) btn.classList.add('border-l-0');
+                btn.innerText = name;
+                btn.dataset.name = name;
+                btn.onclick = () => selectCompetitor(name);
+                filterContainer.appendChild(btn);
+            });
+            selectCompetitor(Object.keys(competitorData)[0]);
+
+            document.querySelectorAll('.recommendation-toggle').forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const content = toggle.nextElementSibling;
+                    const icon = toggle.querySelector('.toggle-icon');
+                    const isVisible = content.style.display === 'block';
+                    content.style.display = isVisible ? 'none' : 'block';
+                    icon.textContent = isVisible ? '+' : '−';
+                });
+            });
+
+            const commonChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: brilliantBlues.text, font: { family: "'Inter', sans-serif" } } },
+                    tooltip: {
+                        callbacks: {
+                            title: (tooltipItems) => {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                return Array.isArray(label) ? label.join(' ') : label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: brilliantBlues.text }, grid: { display: false } },
+                    y: { ticks: { color: brilliantBlues.text }, grid: { color: '#e5e7eb' } }
+                }
+            };
+
+            new Chart(document.getElementById('featureRadarChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['Luxury', 'Family Fun', 'Nightlife', 'Quiet/Relax', 'Value'],
+                    datasets: [
+                        { label: 'The Lodge', data: [4, 3, 2, 3, 2], borderColor: brilliantBlues.dark, backgroundColor: brilliantBlues.dark + '40' },
+                        { label: 'Margaritaville', data: [2, 5, 3, 2, 3], borderColor: brilliantBlues.medium, backgroundColor: brilliantBlues.medium + '40' },
+                        { label: 'Camden', data: [4, 1, 5, 1, 3], borderColor: brilliantBlues.accentRed, backgroundColor: brilliantBlues.accentRed + '40' },
+                        { label: 'Lake Breeze', data: [1, 3, 1, 5, 5], borderColor: brilliantBlues.accentGreen, backgroundColor: brilliantBlues.accentGreen + '40' }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e5e7eb' },
+                            grid: { color: '#e5e7eb' },
+                            pointLabels: { color: brilliantBlues.text, font: { size: 12 } },
+                            ticks: { backdropColor: 'transparent', color: brilliantBlues.text, stepSize: 1 },
+                            min: 0, max: 5
+                        }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('marketBubbleChart'), {
+                type: 'bubble',
+                data: {
+                    datasets: [
+                        { label: 'The Lodge', data: [{ x: 3, y: 7.4, r: 20 }], backgroundColor: brilliantBlues.dark + 'bf' },
+                        { label: 'Margaritaville', data: [{ x: 2, y: 8.3, r: 28 }], backgroundColor: brilliantBlues.medium + 'bf' },
+                        { label: 'Camden', data: [{ x: 9, y: 9.0, r: 12 }], backgroundColor: brilliantBlues.accentRed + 'bf' },
+                        { label: 'The Resort', data: [{ x: 7, y: 7.8, r: 14 }], backgroundColor: brilliantBlues.accentYellow + 'bf' },
+                        { label: 'Lake Breeze', data: [{ x: 1, y: 9.4, r: 5 }], backgroundColor: brilliantBlues.accentGreen + 'bf' }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    scales: {
+                        x: { min: 0, max: 10, title: { display: true, text: 'Family/Relax <--> Adult/Party', color: brilliantBlues.text }, ticks: { color: brilliantBlues.text }, grid: { display: false } },
+                        y: { min: 6.5, max: 10, title: { display: true, text: 'Guest Satisfaction Score', color: brilliantBlues.text }, ticks: { color: brilliantBlues.text }, grid: { color: '#e5e7eb' } }
+                    },
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.dataset.label}: (Score: ${context.parsed.y}, Position: ${context.parsed.x})`
+                            }
+                        }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('digitalPresenceBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['The Lodge', 'Margaritaville', 'The Resort', 'Camden', 'Lake Breeze'],
+                    datasets: [
+                        { label: 'Visual Appeal', data: [5, 4, 3, 5, 2], backgroundColor: brilliantBlues.dark },
+                        { label: 'Navigation', data: [5, 5, 3, 4, 3], backgroundColor: brilliantBlues.medium },
+                        { label: 'Messaging Clarity', data: [4, 5, 2, 5, 4], backgroundColor: brilliantBlues.light },
+                        { label: 'Trustworthiness', data: [3, 4, 1, 4, 5], backgroundColor: brilliantBlues.accentGreen }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    scales: {
+                        x: { stacked: true, ticks: { color: brilliantBlues.text }, grid: { display: false } },
+                        y: { stacked: true, ticks: { color: brilliantBlues.text }, grid: { color: '#e5e7eb' } }
+                    },
+                     plugins: {
+                        ...commonChartOptions.plugins,
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
