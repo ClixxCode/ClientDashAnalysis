@@ -145,38 +145,40 @@
 
             <div id="recommendations-view" class="view">
                  <section class="mb-8">
-                    <h2 class="text-2xl font-bold text-center mb-4 text-[#00429d]">Strategic SWOT Analysis</h2>
+                    <h2 class="text-2xl font-bold text-center mb-4 text-[#00429d]">Strategic SWOT Analysis for Old Kinderhook</h2>
                     <div class="swot-grid max-w-5xl mx-auto">
                         <div class="swot-card border-l-4 border-green-500">
                             <h3><span class="swot-icon">👍</span>Strengths</h3>
                             <ul class="list-disc pl-5 space-y-2 text-gray-700">
-                                <li>**Niche Targeting:** Camden's success proves the power of focusing on a specific demographic (upscale party scene).</li>
-                                <li>**Operational Excellence:** Lake Breeze's high satisfaction demonstrates the value of flawlessly delivering on a simple promise.</li>
-                                <li>**Brand Power:** Margaritaville leverages a strong national brand to attract a large family audience.</li>
+                                <li><strong>Superior Product Quality:</strong> Offers high-quality, modern accommodations and premium amenities, a key differentiator in the market.</li>
+                                <li><strong>Strong Brand Reputation:</strong> Commands high guest satisfaction and is perceived as a premier, upscale destination.</li>
+                                <li><strong>Effective Digital Presence:</strong> Best-in-class website builds trust and makes a powerful first impression.</li>
+                                <li><strong>Balanced Market Appeal:</strong> Successfully attracts both luxury-seeking travelers and families, providing a flexible market position.</li>
                             </ul>
                         </div>
                         <div class="swot-card border-l-4 border-red-500">
                             <h3><span class="swot-icon">👎</span>Weaknesses</h3>
                             <ul class="list-disc pl-5 space-y-2 text-gray-700">
-                                <li>**Product Dissonance:** The Lodge suffers from a major gap between its luxury marketing and its dated room quality.</li>
-                                <li>**Misleading Marketing:** The Resort at LOZ creates deep customer distrust with deceptive website imagery.</li>
-                                <li>**Ancillary Costs:** Margaritaville's "nickel and dime" approach harms its value perception.</li>
+                                <li><strong>Higher Price Point:</strong> Premium pricing can be a barrier for more value-conscious market segments.</li>
+                                <li><strong>Perceived Exclusivity:</strong> A refined atmosphere may deter the mass-market family audience seeking a more casual experience.</li>
+                                <li><strong>Location:</strong> Being slightly removed from the central hub of lake action could be a drawback for some guests.</li>
                             </ul>
                         </div>
                         <div class="swot-card border-l-4 border-blue-500">
                             <h3><span class="swot-icon">💡</span>Opportunities</h3>
                             <ul class="list-disc pl-5 space-y-2 text-gray-700">
-                                <li>**The "Quiet Quality" Gap:** A clear market opening exists for a resort offering premium amenities AND a peaceful atmosphere.</li>
-                                <li>**Capitalize on Competitor Failures:** Directly target guest frustrations with outdated rooms and lack of basic amenities.</li>
-                                <li>**Build Digital Trust:** Become the most transparent brand online by featuring uncensored reviews and video tours.</li>
+                                <li><strong>Own the "Quiet Quality" Gap:</strong> Lead the market for travelers seeking both premium amenities and a peaceful atmosphere.</li>
+                                <li><strong>Attract Discerning Travelers:</strong> Target guests frustrated by competitors' poor lodging quality with a guarantee of modern, well-maintained rooms.</li>
+                                <li><strong>Leverage Digital Trust:</strong> Enhance the website with uncurated reviews and video tours to stand out against misleading marketing.</li>
+                                <li><strong>Create "Effortless Luxury" Packages:</strong> Offer bundled packages (golf, spa, dining) to enhance value and simplify the guest experience.</li>
                             </ul>
                         </div>
                         <div class="swot-card border-l-4 border-yellow-500">
                             <h3><span class="swot-icon">⚠️</span>Threats</h3>
                             <ul class="list-disc pl-5 space-y-2 text-gray-700">
-                                <li>**Price Sensitivity:** While some niches have pricing power, the broader market is still value-conscious.</li>
-                                <li>**Brand Loyalty:** Margaritaville's brand loyalty is strong enough to overlook some product flaws, capturing the mass family market.</li>
-                                <li>**Shifting Tastes:** The demand for experiential travel continues to grow, requiring constant innovation.</li>
+                                <li><strong>Niche Competitors:</strong> Strong competition in the high-energy nightlife and budget cabin segments limits direct entry into those markets.</li>
+                                <li><strong>Mass-Market Brand Power:</strong> Large, branded resorts have a strong hold on the family entertainment market, even with product flaws.</li>
+                                <li><strong>Price Sensitivity:</strong> A significant portion of the broader lake market remains value-driven, requiring clear value communication.</li>
                             </ul>
                         </div>
                     </div>
@@ -244,10 +246,18 @@
             text: '#374151',
             accentRed: '#dc3545',
             accentYellow: '#ffc107',
-            accentGreen: '#28a745'
+            accentGreen: '#28a745',
+            accentPurple: '#6f42c1'
         };
 
         const competitorData = {
+            "Old Kinderhook": {
+                tagline: "The Premier Golf & Lake Resort Destination.",
+                positioning: "A premier, master-planned community focused on championship golf, upscale amenities, and a refined lifestyle. Targets discerning travelers, golfers, and families seeking a high-end, full-service resort experience.",
+                pros: ["Championship Golf Course", "High-Quality Accommodations", "Excellent Dining Options", "Comprehensive Amenities"],
+                cons: ["Higher Price Point", "Can feel more exclusive/less casual", "Location is slightly removed from main lake action"],
+                reputation: { positive: 92, negative: 8 }
+            },
             "The Lodge": {
                 tagline: "LIKE NO OTHER.",
                 positioning: "A historic, premier destination focused on tradition, family, golf, and spa-goers. Aims for an upscale, legacy experience.",
@@ -417,6 +427,7 @@
                 data: {
                     labels: ['Luxury', 'Family Fun', 'Nightlife', 'Quiet/Relax', 'Value'],
                     datasets: [
+                        { label: 'Old Kinderhook', data: [5, 4, 2, 4, 4], borderColor: brilliantBlues.accentPurple, backgroundColor: brilliantBlues.accentPurple + '40' },
                         { label: 'The Lodge', data: [4, 3, 2, 3, 2], borderColor: brilliantBlues.dark, backgroundColor: brilliantBlues.dark + '40' },
                         { label: 'Margaritaville', data: [2, 5, 3, 2, 3], borderColor: brilliantBlues.medium, backgroundColor: brilliantBlues.medium + '40' },
                         { label: 'Camden', data: [4, 1, 5, 1, 3], borderColor: brilliantBlues.accentRed, backgroundColor: brilliantBlues.accentRed + '40' },
@@ -441,6 +452,7 @@
                 type: 'bubble',
                 data: {
                     datasets: [
+                        { label: 'Old Kinderhook', data: [{ x: 4, y: 9.2, r: 15 }], backgroundColor: brilliantBlues.accentPurple + 'bf' },
                         { label: 'The Lodge', data: [{ x: 3, y: 7.4, r: 20 }], backgroundColor: brilliantBlues.dark + 'bf' },
                         { label: 'Margaritaville', data: [{ x: 2, y: 8.3, r: 28 }], backgroundColor: brilliantBlues.medium + 'bf' },
                         { label: 'Camden', data: [{ x: 9, y: 9.0, r: 12 }], backgroundColor: brilliantBlues.accentRed + 'bf' },
@@ -468,12 +480,12 @@
             new Chart(document.getElementById('digitalPresenceBarChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['The Lodge', 'Margaritaville', 'The Resort', 'Camden', 'Lake Breeze'],
+                    labels: ['Old Kinderhook', 'The Lodge', 'Margaritaville', 'The Resort', 'Camden', 'Lake Breeze'],
                     datasets: [
-                        { label: 'Visual Appeal', data: [5, 4, 3, 5, 2], backgroundColor: brilliantBlues.dark },
-                        { label: 'Navigation', data: [5, 5, 3, 4, 3], backgroundColor: brilliantBlues.medium },
-                        { label: 'Messaging Clarity', data: [4, 5, 2, 5, 4], backgroundColor: brilliantBlues.light },
-                        { label: 'Trustworthiness', data: [3, 4, 1, 4, 5], backgroundColor: brilliantBlues.accentGreen }
+                        { label: 'Visual Appeal', data: [5, 5, 4, 3, 5, 2], backgroundColor: brilliantBlues.dark },
+                        { label: 'Navigation', data: [5, 5, 5, 3, 4, 3], backgroundColor: brilliantBlues.medium },
+                        { label: 'Messaging Clarity', data: [5, 4, 5, 2, 5, 4], backgroundColor: brilliantBlues.light },
+                        { label: 'Trustworthiness', data: [5, 3, 4, 1, 4, 5], backgroundColor: brilliantBlues.accentGreen }
                     ]
                 },
                 options: {
@@ -495,5 +507,7 @@
     </script>
 </body>
 </html>
+
+
 
 
