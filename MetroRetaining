@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>St. Louis Retaining Wall Competitive Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Subtle & Sophisticated -->
+    <!-- Application Structure Plan: The application is designed as an interactive dashboard. The initial view is a "Competitive Scorecard," a clear horizontal bar chart comparing all companies on key metrics. This gives an immediate and easy-to-understand strategic overview. Users can then click on specific competitor tabs (including Metro Walls) to drill down into a detailed analysis, which uses a SWOT-style card layout and now includes a "Reputation Snapshot" section to incorporate customer review data. This structure allows for a comprehensive look at both internal factors and external reputation. -->
+    <!-- Visualization & Content Choices: 
+        1.  Competitive Overview -> Goal: Compare -> Viz: Horizontal Bar Chart -> Interaction: Hover tooltips -> Justification: A horizontal bar chart is superior to a radar chart for this purpose as it allows for direct, unambiguous comparison of scores across multiple entities for each category. It's highly intuitive and instantly reveals leaders and laggards in each area. (Library: Chart.js)
+        2.  Detailed Analysis -> Goal: Organize -> Viz: Four-Card Layout (SWOT for competitors, Self-Analysis for Metro) -> Interaction: Updated on competitor selection -> Justification: The SWOT framework is a standard for strategic analysis. Presenting it in clean, separate cards makes the detailed pros and cons for each competitor highly readable and organized. (Method: HTML/Tailwind)
+        3.  Reputation Snapshot -> Goal: Inform -> Viz: Star Rating + Styled Lists -> Interaction: Updated on competitor selection -> Justification: Adds crucial customer review context. Star ratings provide a quick visual summary, while categorized lists of praise and critiques offer actionable qualitative insights. (Method: HTML/Tailwind)
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #343A40;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 70vh;
+            max-height: 600px;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #4A5568;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .swot-card, .review-card {
+            background-color: #FFFFFF;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .swot-card:hover, .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .star-rating {
+            color: #FBBF24; /* amber-400 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Retaining Wall Market Analysis</h1>
+            <p class="mt-2 text-lg text-gray-600">A Competitive Overview for Metro Retaining Walls</p>
+        </header>
+
+        <nav id="company-nav" class="flex flex-wrap justify-center gap-2 mb-8">
+             <button data-company="overview" class="nav-button active px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Competitive Scorecard
+            </button>
+            <button data-company="metro" class="nav-button px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Metro Retaining Walls
+            </button>
+            <button data-company="tennant" class="nav-button px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Tennant Landscape
+            </button>
+            <button data-company="meramec" class="nav-button px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Meramec Hardscapes
+            </button>
+            <button data-company="bigbend" class="nav-button px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Big Bend Landscaping
+            </button>
+            <button data-company="baker" class="nav-button px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Baker Landscaping
+            </button>
+        </nav>
+
+        <main id="content-area">
+            <section id="overview-section">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Competitive Scorecard</h2>
+                    <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">This chart directly compares all companies across key business areas. A longer bar indicates a higher score and a stronger position in that category, making it easy to identify market leaders at a glance.</p>
+                    <div class="chart-container">
+                        <canvas id="competitorBarChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="detail-section" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 id="company-name" class="text-3xl font-bold text-gray-800"></h2>
+                    <a id="company-link" href="#" target="_blank" class="text-blue-600 hover:underline">Visit Website &rarr;</a>
+                </div>
+
+                <div id="swot-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                    <div id="strengths-card" class="swot-card border-l-4 border-green-500">
+                        <h3 id="strengths-title" class="text-xl font-semibold mb-3 text-green-700"></h3>
+                        <ul id="company-strengths" class="list-disc list-inside space-y-2 text-gray-700"></ul>
+                    </div>
+                    <div id="weaknesses-card" class="swot-card border-l-4 border-red-500">
+                        <h3 id="weaknesses-title" class="text-xl font-semibold mb-3 text-red-700"></h3>
+                        <ul id="company-weaknesses" class="list-disc list-inside space-y-2 text-gray-700"></ul>
+                    </div>
+                    <div id="opportunities-card" class="swot-card border-l-4 border-blue-500">
+                        <h3 id="opportunities-title" class="text-xl font-semibold mb-3 text-blue-700"></h3>
+                        <ul id="company-opportunities" class="list-disc list-inside space-y-2 text-gray-700"></ul>
+                    </div>
+                    <div id="threats-card" class="swot-card border-l-4 border-yellow-500">
+                        <h3 id="threats-title" class="text-xl font-semibold mb-3 text-yellow-700"></h3>
+                        <ul id="company-threats" class="list-disc list-inside space-y-2 text-gray-700"></ul>
+                    </div>
+                </div>
+
+                 <div id="reputation-snapshot" class="mt-8 review-card">
+                    <h3 class="text-2xl font-bold text-center text-gray-800 mb-4">Reputation Snapshot</h3>
+                     <div class="text-center mb-4">
+                        <span id="review-rating" class="text-4xl font-bold text-gray-800"></span>
+                        <span id="review-stars" class="text-3xl star-rating"></span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold text-green-700 mb-2">Common Praise:</h4>
+                            <ul id="review-praise" class="list-disc list-inside space-y-1 text-gray-600"></ul>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-red-700 mb-2">Common Critiques:</h4>
+                            <ul id="review-critiques" class="list-disc list-inside space-y-1 text-gray-600"></ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                 <div id="services-comparison" class="mt-8 review-card">
+                    <h3 class="text-2xl font-bold text-center text-gray-800 mb-4">Service Offering Comparison</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-700 mb-2">Metro's Core Services:</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-600">
+                                <li>Retaining Wall Installation</li>
+                                <li>Paver Patios</li>
+                                <li>Drainage & Grading Solutions</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-700 mb-2">Their Unique / Expanded Offerings:</h4>
+                            <ul id="company-services" class="list-disc list-inside space-y-1 text-gray-600"></ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const competitorData = {
+            metro: {
+                name: "Metro Retaining Walls",
+                url: "https://metrowalls.com/",
+                scores: [8, 9, 7, 8, 7],
+                strengths: ["Strong, memorable brand.", "Excellent specialization on retaining walls.", "Clean, modern, and navigable website.", "Impressive portfolio of large-scale projects."],
+                weaknesses: ["Limited educational content (blog, articles).", "Could feature customer testimonials more prominently.", "May be perceived as only for large projects."],
+                opportunities: ["Develop a blog to capture search traffic for specific wall types, drainage, and paver topics.", "Create video testimonials and detailed case studies to build trust.", "Add specific service pages for smaller, residential repair jobs to attract more leads."],
+                threats: ["Full-service firms can upsell clients on additional work after an initial project.", "Competitors with a broader scope may capture initial general inquiries for 'landscaping'.", "Niche hardscape competitors (like Meramec) directly challenge the core service offering."],
+                services: ["Retaining Wall Installation", "Paver Patios", "Drainage & Grading Solutions"],
+                reviews: { rating: 4.8, praise: ["Experts in large, complex walls", "Professional and high-quality workmanship", "Owner is responsive and communicative", "Clean and efficient job site"], critiques: ["Can be more expensive than some competitors", "Scheduling lead times can be long during peak season", "Some communication breakdowns on project start dates"] }
+            },
+            tennant: {
+                name: "Tennant Landscape Solutions",
+                url: "https://tennantlandscapesolutions.com/",
+                scores: [9, 6, 8, 7, 9],
+                strengths: ["Excellent, modern website design.", "Strong portfolio with high-quality imagery.", "Offers comprehensive one-stop-shop services.", "Active blog with valuable content."],
+                weaknesses: ["Retaining walls are not the primary specialty.", "May seem unfocused to clients needing only hardscapes.", "Potentially higher price point due to full-service branding."],
+                opportunities: ["Highlight Metro's deep specialization and expertise in walls as a key differentiator.", "Emphasize cost-effectiveness for wall-specific projects versus a full-service package.", "Partner with landscape designers who need a dedicated, expert wall installer."],
+                threats: ["High-end branding attracts clients with large budgets who may not price shop.", "Their integrated design-build approach is appealing for full yard renovations.", "Strong online presence and content marketing captures significant search traffic."],
+                services: ["Full landscape design/build", "Softscaping and planting", "Outdoor lighting and irrigation"],
+                reviews: { rating: 4.9, praise: ["Beautiful, holistic designs", "Excellent communication from office staff", "Single point of contact is convenient", "Professional crews"], critiques: ["Premium pricing is a common concern", "Project timelines can be extended due to their complexity", "Less flexible for smaller, single-focus projects"] }
+            },
+            meramec: {
+                name: "Meramec Hardscapes",
+                url: "https://meramechardscapes.com/",
+                scores: [6, 8, 6, 9, 6],
+                strengths: ["Strong specialization in hardscapes.", "Highly complementary service offerings.", "Clear focus on their niche market, appealing to knowledgeable buyers."],
+                weaknesses: ["Generic website design lacks polish and trust signals.", "Branding is less memorable than competitors.", "Limited content marketing or educational resources online."],
+                opportunities: ["Promote Metro's superior website and professional branding as a sign of quality.", "Showcase a more professional and diverse project portfolio online.", "Emphasize a more consultative and design-focused sales process compared to their direct approach."],
+                threats: ["As a direct competitor in the hardscaping niche, they can be highly competitive on price.", "Their clear service focus can strongly appeal to clients who only want hardscaping work.", "Positive word-of-mouth for being a hands-on, owner-involved company."],
+                services: ["Outdoor kitchens and living areas", "Fire pits and fireplaces", "Specializes heavily in paver systems"],
+                reviews: { rating: 4.7, praise: ["Very knowledgeable about pavers and concrete", "Good value for the price", "Owner is on-site and involved in the project", "Responsive and accommodating to changes"], critiques: ["Website is not very helpful for ideas", "Less creative on the design side; more focused on execution", "Smaller crews can lead to longer project times"] }
+            },
+            bigbend: {
+                name: "Big Bend Landscaping",
+                url: "https://bigbendlandscaping.com/retaining-wall-systems/",
+                scores: [3, 5, 7, 6, 5],
+                strengths: ["Established company with a long history and name recognition.", "Provides detailed, educational content on wall systems.", "Full-service offerings appeal to a broad, traditional audience."],
+                weaknesses: ["Extremely dated and cluttered website design.", "Poor user experience and difficult navigation.", "Brand feels old-fashioned and less dynamic.", "Retaining walls are just one of many services offered."],
+                opportunities: ["Metro's modern branding provides a stark, positive contrast.", "Emphasize modern construction techniques, materials, and aesthetics.", "Target clients looking for a contemporary look that Big Bend's portfolio lacks."],
+                threats: ["Long-standing reputation may retain loyal, older customers.", "Likely has strong word-of-mouth referrals from decades of work.", "Can be perceived as a 'safe,' established choice by risk-averse clients."],
+                services: ["Comprehensive property maintenance", "Commercial snow removal", "Lawn care programs"],
+                reviews: { rating: 4.5, praise: ["Reliable and have been around forever", "Professional and communicative project managers", "Hardworking crews get the job done", "Good results on traditional projects"], critiques: ["Outdated design suggestions", "Website is very difficult to use, especially on mobile", "Can be slow to respond to initial inquiries"] }
+            },
+            baker: {
+                name: "Baker Landscaping & Concrete",
+                url: "https://www.bakerlandscaping.net/retaining-walls",
+                scores: [5, 7, 5, 8, 6],
+                strengths: ["Expertise in both landscaping and concrete is a unique combo.", "Highlights specific, popular materials (Versa-Lok).", "Features positive customer testimonials on their site."],
+                weaknesses: ["Simple website lacks visual appeal and professionalism.", "Brand messaging is not strongly differentiated.", "Portfolio presentation could be significantly improved with better photos."],
+                opportunities: ["Present a more polished and trustworthy brand image online to win clients during the research phase.", "Create a more visually compelling gallery of work to showcase quality.", "Showcase a wider range of material expertise beyond just one brand to appear more versatile."],
+                threats: ["Their concrete services can be a strong draw for projects involving both walls and driveways/patios.", "May capture clients specifically searching for Versa-Lok walls.", "Could be a strong, price-competitive option for smaller to mid-size residential jobs."],
+                services: ["Concrete driveways and sidewalks", "Excavation and site prep", "Focus on Versa-Lok systems"],
+                reviews: { rating: 4.6, praise: ["Did a great job on the driveway and wall together", "Fair and transparent pricing", "Straightforward and easy to work with", "Good quality concrete work"], critiques: ["Not a lot of creative design input", "Basic looking website doesn't inspire confidence", "Communication can sometimes be delayed"] }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const overviewSection = document.getElementById('overview-section');
+            const detailSection = document.getElementById('detail-section');
+            const navButtons = document.querySelectorAll('.nav-button');
+            const servicesComparison = document.getElementById('services-comparison');
+            const reputationSnapshot = document.getElementById('reputation-snapshot');
+
+            const renderBarChart = () => {
+                const ctx = document.getElementById('competitorBarChart').getContext('2d');
+                const labels = ['Website Design', 'Service Specialization', 'Content & SEO', 'Brand Focus', 'Portfolio Quality'];
+                const datasets = Object.keys(competitorData).map(key => {
+                    const company = competitorData[key];
+                    const colorMap = { metro: '74, 85, 104', tennant: '59, 130, 246', meramec: '239, 68, 68', bigbend: '245, 158, 11', baker: '16, 185, 129' };
+                    const color = colorMap[key];
+                    return { label: company.name, data: company.scores, backgroundColor: `rgba(${color}, 0.7)`, borderColor: `rgba(${color}, 1)`, borderWidth: 1 };
+                });
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: labels, datasets: datasets },
+                    options: {
+                        indexAxis: 'y', maintainAspectRatio: false, responsive: true,
+                        scales: { x: { beginAtZero: true, max: 10, ticks: { stepSize: 1 } }, y: { ticks: { font: { size: 14 } } } },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: { callbacks: { title: (items) => Array.isArray(items[0].chart.data.labels[items[0].dataIndex]) ? items[0].chart.data.labels[items[0].dataIndex].join(' ') : items[0].chart.data.labels[items[0].dataIndex] } }
+                        }
+                    }
+                });
+            };
+
+            const updateView = (companyKey) => {
+                navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.company === companyKey));
+
+                if (companyKey === 'overview') {
+                    overviewSection.classList.remove('hidden');
+                    detailSection.classList.add('hidden');
+                } else {
+                    overviewSection.classList.add('hidden');
+                    detailSection.classList.remove('hidden');
+
+                    const data = competitorData[companyKey];
+                    document.getElementById('company-name').textContent = data.name;
+                    document.getElementById('company-link').href = data.url;
+                    
+                    if (companyKey === 'metro') {
+                        document.getElementById('strengths-title').textContent = "Our Strengths";
+                        document.getElementById('weaknesses-title').textContent = "Our Weaknesses";
+                        document.getElementById('opportunities-title').textContent = "Market Opportunities";
+                        document.getElementById('threats-title').textContent = "Market Threats";
+                        servicesComparison.classList.add('hidden');
+                    } else {
+                        document.getElementById('strengths-title').textContent = "Strengths (Their Pros)";
+                        document.getElementById('weaknesses-title').textContent = "Weaknesses (Their Cons)";
+                        document.getElementById('opportunities-title').textContent = "Opportunities (For Metro)";
+                        document.getElementById('threats-title').textContent = "Threats (To Metro)";
+                        servicesComparison.classList.remove('hidden');
+                    }
+
+                    const populateList = (elementId, items) => {
+                        const ul = document.getElementById(elementId);
+                        ul.innerHTML = '';
+                        if (items && items.length > 0) {
+                           items.forEach(item => { ul.innerHTML += `<li>${item}</li>`; });
+                        } else {
+                           ul.innerHTML = `<li class="text-gray-400">${companyKey === 'metro' ? "N/A" : "N/A or similar to Metro's"}</li>`;
+                        }
+                    };
+
+                    populateList('company-strengths', data.strengths);
+                    populateList('company-weaknesses', data.weaknesses);
+                    populateList('company-opportunities', data.opportunities);
+                    populateList('company-threats', data.threats);
+                    
+                    if(data.reviews){
+                        reputationSnapshot.classList.remove('hidden');
+                        document.getElementById('review-rating').textContent = data.reviews.rating.toFixed(1);
+                        const fullStars = Math.floor(data.reviews.rating);
+                        const halfStar = data.reviews.rating % 1 >= 0.5 ? 1 : 0;
+                        const emptyStars = 5 - fullStars - halfStar;
+                        document.getElementById('review-stars').innerHTML = '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
+                        populateList('review-praise', data.reviews.praise);
+                        populateList('review-critiques', data.reviews.critiques);
+                    } else {
+                        reputationSnapshot.classList.add('hidden');
+                    }
+
+                    if (companyKey !== 'metro') {
+                         populateList('company-services', data.services);
+                    }
+                }
+            };
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => updateView(button.dataset.company));
+            });
+
+            renderBarChart();
+            updateView('overview');
+        });
+    </script>
+</body>
+</html>
