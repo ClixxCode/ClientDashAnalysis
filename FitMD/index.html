@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fit MD | Medical Weight Loss Competitive Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Teal -->
+    <!-- Application Structure Plan: The application now uses a "summary-first, details-on-demand" architecture. It starts with a sticky header for quick navigation. The first section provides a high-level "Competitive Overview" with a horizontal bar chart for a single, easy-to-digest overall score. This is followed by a "Detailed Breakdown" for granular multi-dimensional comparison. Next is a "Deep Dive Comparison" for specific metrics, followed by an interactive "SWOT Analysis." The final section presents clear "Actionable Recommendations." This structure was chosen to guide the user from a broad understanding to granular details and finally to strategic conclusions, making a complex report easily digestible and explorable. -->
+    <!-- Visualization & Content Choices: 
+        - Overall Performance Score: Report Info -> Overall average scores -> Goal: Inform/Compare -> Viz: Horizontal Bar Chart -> Interaction: Hover tooltips -> Justification: Provides a direct, single-metric comparison that is extremely easy to read and understand at a glance, immediately answering the primary question of who is the strongest competitor. -> Library: Chart.js/Canvas.
+        - Detailed Breakdown: Report Info -> Individual competitive scores -> Goal: Compare -> Viz: Grouped Bar Chart -> Interaction: Hover tooltips -> Justification: Breaks down the overall score into its component parts, allowing users to understand the "why" behind the scores. -> Library: Chart.js/Canvas.
+        - Deep Dive Metrics: Report Info -> Scores for Trust, UX, etc. -> Goal: Compare -> Viz: Bar Chart -> Interaction: Tooltips; updates content view -> Justification: Clear, direct comparison of specific metrics. -> Library: Chart.js/Canvas.
+        - SWOT Details: Report Info -> Qualitative SWOT points -> Goal: Organize -> Viz: Interactive 2x2 Grid -> Interaction: Click buttons to select a clinic and display its data -> Justification: Manages large amounts of text cleanly in an interactive, space-saving format. -> Method: HTML/CSS/JS.
+        - Qualitative Breakdowns: Report Info -> Detailed text analysis -> Goal: Inform -> Viz: Styled cards -> Interaction: Show/hide based on user selection in the Deep Dive section -> Justification: Presents dense text in digestible, context-aware chunks. -> Method: HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 420px;
+            max-height: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 480px;
+            }
+        }
+        .section-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .section-fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-slate-900">Fit MD Competitive Analysis</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overall-scores" class="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Overall Scores</a>
+                        <a href="#breakdown" class="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Breakdown</a>
+                        <a href="#deep-dive" class="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Deep Dive</a>
+                        <a href="#swot" class="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">SWOT Analysis</a>
+                        <a href="#recommendations" class="text-gray-600 hover:bg-gray-200 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Recommendations</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <section id="overall-scores" class="section-fade-in min-h-[60vh] flex flex-col justify-center">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-2">Overall Performance Summary</h2>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8">
+                This chart provides a single, easy-to-read score for each clinic, representing the average of all five key metrics. This is the fastest way to understand each competitor's overall position in the market.
+            </p>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="chart-container">
+                    <canvas id="overallScoreBarChart"></canvas>
+                </div>
+            </div>
+        </section>
+        
+        <section id="breakdown" class="section-fade-in min-h-[80vh] flex flex-col justify-center">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-2">Detailed Competitive Breakdown</h2>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8">
+                This section provides a deeper look at how Fit MD compares against key competitors across five core business dimensions. Use the chart below to identify specific market strengths and weaknesses. Each clinic is scored out of 10 for each category.
+            </p>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="chart-container">
+                    <canvas id="detailedBreakdownChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="deep-dive" class="section-fade-in mt-16">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-2">Deep Dive Comparison</h2>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8">
+                Explore a more detailed comparison across specific areas of the business. Select a category to see how each clinic performs based on our analysis and view detailed qualitative notes for each competitor.
+            </p>
+            <div class="flex justify-center flex-wrap gap-2 mb-8">
+                <button class="deep-dive-btn bg-teal-500 text-white px-4 py-2 rounded-full font-semibold shadow" data-category="trust">Trust & Credibility</button>
+                <button class="deep-dive-btn bg-white text-slate-700 px-4 py-2 rounded-full font-semibold shadow" data-category="expertise">Expertise Presentation</button>
+                <button class="deep-dive-btn bg-white text-slate-700 px-4 py-2 rounded-full font-semibold shadow" data-category="process">Process Communication</button>
+                <button class="deep-dive-btn bg-white text-slate-700 px-4 py-2 rounded-full font-semibold shadow" data-category="ux">User Experience</button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+                 <div class="chart-container h-96 max-h-[450px]">
+                    <canvas id="deepDiveBarChart"></canvas>
+                </div>
+            </div>
+            
+            <div id="deep-dive-details" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </section>
+        
+        <section id="swot" class="section-fade-in mt-16">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-2">SWOT Analysis</h2>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8">
+                A detailed look at the Strengths, Weaknesses, Opportunities, and Threats for Fit MD and its competitors. Select a clinic to view its complete SWOT profile, providing strategic insights into its market position.
+            </p>
+            <div class="flex justify-center flex-wrap gap-2 mb-8" id="swot-clinic-selector">
+            </div>
+            
+            <div id="swot-display" class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 id="swot-clinic-name" class="text-2xl font-bold text-slate-900 mb-6 text-center"></h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h4 class="font-bold text-lg text-green-800 mb-2">Strengths</h4>
+                        <ul id="swot-strengths" class="list-disc list-inside text-slate-700 space-y-1"></ul>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                        <h4 class="font-bold text-lg text-red-800 mb-2">Weaknesses</h4>
+                        <ul id="swot-weaknesses" class="list-disc list-inside text-slate-700 space-y-1"></ul>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <h4 class="font-bold text-lg text-blue-800 mb-2">Opportunities</h4>
+                        <ul id="swot-opportunities" class="list-disc list-inside text-slate-700 space-y-1"></ul>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                        <h4 class="font-bold text-lg text-yellow-800 mb-2">Threats</h4>
+                        <ul id="swot-threats" class="list-disc list-inside text-slate-700 space-y-1"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="recommendations" class="section-fade-in mt-16">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-2">Actionable Recommendations for Fit MD</h2>
+            <p class="text-center text-slate-600 max-w-3xl mx-auto mb-8">
+                Based on the comprehensive analysis, here are key strategic recommendations to enhance Fit MD's market position, build trust, and improve user engagement.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
+                    <h3 class="font-bold text-lg text-slate-900 mb-2">Enhance Medical Authority</h3>
+                    <p class="text-slate-600">Clearly present the medical team's credentials and experience on a dedicated page. Develop educational content specifically about medical weight loss, including GLP-1 medications, to demonstrate deep expertise. Publish case studies or patient success stories to build trust in your medical approach.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
+                    <h3 class="font-bold text-lg text-slate-900 mb-2">Clarify the Patient Journey</h3>
+                    <p class="text-slate-600">Develop a clear, step-by-step "Our Process" page dedicated to the medical weight loss journey. Use simple graphics or a timeline to illustrate the process from initial consultation to treatment and follow-up. Address common questions about process, pricing, and timelines upfront to reduce patient hesitation.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
+                    <h3 class="font-bold text-lg text-slate-900 mb-2">Differentiate Your Positioning</h3>
+                    <p class="text-slate-600">Sharpen key messaging to highlight what makes Fit MD unique. Focus on your comprehensive, personalized approach that combines medication, nutrition, and lifestyle coaching. Differentiate from large hospital systems and supplement companies by emphasizing your holistic, medically supervised care.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
+                    <h3 class="font-bold text-lg text-slate-900 mb-2">Strengthen Social Proof</h3>
+                    <p class="text-slate-600">Actively encourage patient testimonials and reviews on platforms like Google. Display trust badges and certifications prominently on your website. Use social media to share success stories and engage with the community to build a loyal following.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
+                    <h3 class="font-bold text-lg text-slate-900 mb-2">Optimize User Experience</h3>
+                    <p class="text-slate-600">Ensure the website navigation is intuitive and fully responsive. Implement a clear call-to-action for booking appointments on every page. Test and improve website loading speed, as this is a key factor for user retention and SEO, especially for a medical audience.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
+                    <h3 class="font-bold text-lg text-slate-900 mb-2">Create Targeted Content</h3>
+                    <p class="text-slate-600">Publish regular blog posts and video content that addresses specific patient concerns and questions related to medical weight loss. This will not only establish you as an expert but also improve your organic search rankings for valuable long-tail keywords.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white mt-16">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-slate-500">
+            <p>&copy; 2025 Fit MD Medical Weight Loss Competitive Analysis. For internal use only.</p>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const data = {
+                clinics: [
+                    "Fit MD", "Intermountain Healthcare", "Colorado Medical Diet", "Access Medical", "Medfit"
+                ],
+                overview: {
+                    labels: ["Positioning", "Credibility", "Expertise", "Process", "UX"],
+                    datasets: [
+                        { name: "Fit MD", scores: [7, 6, 7, 5, 6] },
+                        { name: "Intermountain Healthcare", scores: [8, 9, 9, 9, 8] },
+                        { name: "Colorado Medical Diet", scores: [7, 8, 8, 7, 7] },
+                        { name: "Access Medical", scores: [8, 9, 8, 8, 7] },
+                        { name: "Medfit", scores: [6, 7, 6, 6, 8] }
+                    ]
+                },
+                deepDive: {
+                    trust: {
+                        label: "Trust & Credibility Score",
+                        scores: [6.0, 9.5, 8.0, 9.0, 7.0],
+                        details: {
+                            "Fit MD": { title: "Developing Trust", text: "Lacks significant patient reviews and prominent trust badges, which are key opportunities for growth. Focus on building social proof." },
+                            "Intermountain Healthcare": { title: "High Trust", text: "As a large hospital system, it has immense inherent credibility and is a trusted name in healthcare. This is a major advantage." },
+                            "Colorado Medical Diet": { title: "Solid Trust", text: "Benefit from a large volume of positive reviews and a professional feel. Credibility is strong within the niche." },
+                            "Access Medical": { title: "Very High Trust", text: "Extensive and very positive patient testimonials prominently featured. This is a key strength and a powerful trust signal." },
+                            "Medfit": { title: "Moderate Trust", text: "Trust is built on the expertise of individual trainers and a strong community feel. Less traditional medical credentials are on display." }
+                        }
+                    },
+                    expertise: {
+                        label: "Expertise Presentation Score",
+                        scores: [7.0, 9.0, 8.0, 8.0, 6.0],
+                        details: {
+                            "Fit MD": { title: "Good Foundation", text: "The team's credentials are clear but could be expanded upon with more specific medical weight loss content. Lacks case studies or deep educational materials to fully establish authority." },
+                            "Intermountain Healthcare": { title: "Exceptional Expertise", text: "Demonstrates authority through detailed articles on GLP-1 medications, pharmacist-led consultations, and clear clinical pathways. Positioned as a thought leader." },
+                            "Colorado Medical Diet": { title: "Clearly Presented", text: "Expertise is shown through a focus on specific medications like compounded semaglutide. Content is solid, but could be more comprehensive on a wider range of topics." },
+                            "Access Medical": { title: "Strong Expertise", text: "Presents expertise through the clear credentials of its practitioners and a patient-centric, telehealth approach. The focus is on a direct, personal connection." },
+                            "Medfit": { title: "Niche Expertise", text: "Expertise is rooted in physical training and lifestyle medicine. While highly skilled, it does not present the traditional medical credentials of a clinic." }
+                        }
+                    },
+                    process: {
+                        label: "Process Communication Score",
+                        scores: [5.0, 9.0, 7.0, 8.0, 6.0],
+                        details: {
+                            "Fit MD": { title: "Needs Clarification", text: "The overall process for medical weight loss is not clearly explained on the website. Lacks pricing transparency and a detailed patient journey, which can create uncertainty for potential clients." },
+                            "Intermountain Healthcare": { title: "Very Clear Process", text: "Provides a precise, step-by-step patient journey for their online program, from assessment to home delivery. Pricing is also relatively transparent." },
+                            "Colorado Medical Diet": { title: "Good Clarity", text: "The website explains its core services and patient flow well, with a clear focus on medication and support. Appointment scheduling is also efficient." },
+                            "Access Medical": { title: "Transparent & Easy", text: "Patient journey is well-defined and straightforward, centered on a telehealth model. Many reviews praise the simplicity and efficiency of the process." },
+                            "Medfit": { title: "Customized Process", text: "The process is based on personalized one-on-one training, which is detailed on the site. However, the exact steps for a \"medical\" weight loss program are less defined than for a clinic." }
+                        }
+                    },
+                    ux: {
+                        label: "User Experience Score",
+                        scores: [6.0, 8.0, 7.0, 7.0, 8.0],
+                        details: {
+                            "Fit MD": { title: "Needs Improvement", text: "Website navigation is somewhat confusing, and the mobile experience is not fully optimized. Booking is functional but could be smoother. Opportunities exist to streamline the user flow." },
+                            "Intermountain Healthcare": { title: "Excellent UX", text: "As a large healthcare provider, the site is highly professional, easy to navigate, and fully mobile-responsive. Appointment booking and information retrieval are seamless." },
+                            "Colorado Medical Diet": { title: "Good UX", text: "The website is easy to use and mobile-friendly. Information is accessible. The booking process is straightforward, but the design could be more modern." },
+                            "Access Medical": { title: "Functional UX", text: "The site is clear and easy to navigate, with a strong focus on testimonials. The telehealth model makes the user experience very convenient, even if the design is simple." },
+                            "Medfit": { title: "High-Quality UX", text: "The website is clean, modern, and visually appealing. It is easy to navigate and find information about their services and trainers." }
+                        }
+                    }
+                },
+                swot: {
+                    "Fit MD": {
+                        s: ["Broad service offering beyond hormones", "Modern and clean website aesthetic", "Team-based approach to wellness"],
+                        w: ["Lack of social proof (reviews, testimonials)", "Unclear patient process and pricing for medical weight loss", "Weak content strategy and expertise demonstration"],
+                        o: ["Become a leading resource for integrative wellness education", "Target specific medical weight loss personas with tailored content", "Showcase patient success stories to build trust"],
+                        t: ["Large hospital systems with greater credibility", "Specialized competitors with clearer medical messaging", "E-commerce-based, non-medical solutions gaining popularity"]
+                    },
+                    "Intermountain Healthcare": {
+                        s: ["Immense brand credibility and trust", "Clear, well-defined online process", "Extensive medical resources and staff"],
+                        w: ["Can be perceived as less personalized due to size", "Potential for complex navigation across a large hospital system site"],
+                        o: ["Leverage brand authority to attract patients seeking safe, proven solutions", "Expand online services to more states"],
+                        t: ["Boutique clinics can offer a more personal, hands-on experience", "Smaller, specialized competitors may be more agile and responsive"]
+                    },
+                    "Colorado Medical Diet": {
+                        s: ["Clear focus on medical diet and medication", "Good reviews and positive patient feedback", "Efficient appointment scheduling"],
+                        w: ["Website design is professional but lacks a strong unique identity", "Fewer trust indicators than top competitors"],
+                        o: ["Create more detailed content on their methodology to build authority", "Develop a stronger brand identity to differentiate from generic competitors"],
+                        t: ["Larger clinics with more comprehensive service offerings", "Competing on price with other telehealth providers"]
+                    },
+                    "Access Medical": {
+                        s: ["Strong patient testimonials and social proof", "Telehealth model for convenience and accessibility", "Patient-centric care focused on personal goals"],
+                        w: ["Potential for a less robust in-person experience", "Reliance on a few key practitioners for branding"],
+                        o: ["Further develop the telehealth platform to include more resources", "Expand marketing to new geographic areas"],
+                        t: ["Patients may prefer in-person clinics for medical services", "Competition from large-scale telehealth providers with bigger budgets"]
+                    },
+                    "Medfit": {
+                        s: ["Highly personalized, hands-on approach", "Strong community and social proof from fitness clients", "Unique focus on physical fitness and medical-based training"],
+                        w: ["Positioning is less clear as a 'medical weight loss clinic'", "Lacks direct medication-based treatment offerings", "Limited scope of expertise from a traditional medical standpoint"],
+                        o: ["Partner with medical clinics to offer a combined program", "Educate the market on the importance of fitness in medical weight loss"],
+                        t: ["Patients seeking medication will look elsewhere", "Competition from traditional gyms and personal trainers"]
+                    }
+                }
+            };
+            
+            const clinicColors = {
+                "Fit MD": 'rgba(20, 184, 166, 0.8)',
+                "Intermountain Healthcare": 'rgba(59, 130, 246, 0.8)',
+                "Colorado Medical Diet": 'rgba(239, 68, 68, 0.8)',
+                "Access Medical": 'rgba(139, 92, 246, 0.8)',
+                "Medfit": 'rgba(249, 115, 22, 0.8)'
+            };
+
+            const clinicBorderColors = {
+                "Fit MD": 'rgba(20, 184, 166, 1)',
+                "Intermountain Healthcare": 'rgba(59, 130, 246, 1)',
+                "Colorado Medical Diet": 'rgba(239, 68, 68, 1)',
+                "Access Medical": 'rgba(139, 92, 246, 1)',
+                "Medfit": 'rgba(249, 115, 22, 1)'
+            };
+            
+            let deepDiveBarChart;
+
+            function renderOverallScoreChart() {
+                const ctx = document.getElementById('overallScoreBarChart').getContext('2d');
+                const overallScores = data.overview.datasets.map(d => {
+                    const sum = d.scores.reduce((a, b) => a + b, 0);
+                    return parseFloat((sum / d.scores.length).toFixed(1));
+                });
+                
+                const datasets = [{
+                    label: "Overall Score (Out of 10)",
+                    data: overallScores,
+                    backgroundColor: data.clinics.map(c => clinicColors[c]),
+                    borderColor: data.clinics.map(c => clinicBorderColors[c]),
+                    borderWidth: 1
+                }];
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.clinics,
+                        datasets: datasets
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                suggestedMax: 10,
+                                title: {
+                                    display: true,
+                                    text: 'Overall Score'
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    autoSkip: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                        }
+                    }
+                });
+            }
+
+            function renderDetailedBreakdownChart() {
+                const ctx = document.getElementById('detailedBreakdownChart').getContext('2d');
+                const labels = data.overview.labels;
+                const datasets = data.overview.datasets.map(d => ({
+                    label: d.name,
+                    data: d.scores,
+                    backgroundColor: clinicColors[d.name] || 'rgba(128, 128, 128, 0.8)',
+                    borderColor: clinicBorderColors[d.name] || 'rgba(128, 128, 128, 1)',
+                    borderWidth: 1
+                }));
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                suggestedMax: 10,
+                                title: {
+                                    display: true,
+                                    text: 'Score (out of 10)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    autoSkip: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                        }
+                    }
+                });
+            }
+            
+            function renderDeepDiveChart(category) {
+                const categoryData = data.deepDive[category];
+                const detailsContainer = document.getElementById('deep-dive-details');
+                
+                const chartData = {
+                    labels: data.clinics,
+                    datasets: [{
+                        label: categoryData.label,
+                        data: categoryData.scores,
+                        backgroundColor: data.clinics.map(c => clinicColors[c] || 'rgba(128, 128, 128, 0.8)'),
+                        borderColor: data.clinics.map(c => clinicBorderColors[c] || 'rgba(128, 128, 128, 1)'),
+                        borderWidth: 1
+                    }]
+                };
+
+                const ctx = document.getElementById('deepDiveBarChart').getContext('2d');
+                if (deepDiveBarChart) {
+                    deepDiveBarChart.destroy();
+                }
+                deepDiveBarChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                suggestedMax: 10
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+                
+                detailsContainer.innerHTML = '';
+                data.clinics.forEach(clinic => {
+                    const detail = categoryData.details[clinic];
+                    const card = `
+                        <div class="bg-slate-50 p-5 rounded-lg border">
+                            <h3 class="font-bold text-lg text-slate-800">${clinic}</h3>
+                            <p class="font-semibold text-teal-600 mb-2">${detail.title}</p>
+                            <p class="text-slate-600 text-sm">${detail.text}</p>
+                        </div>
+                    `;
+                    detailsContainer.innerHTML += card;
+                });
+            }
+
+            function setupDeepDiveButtons() {
+                const buttons = document.querySelectorAll('.deep-dive-btn');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        buttons.forEach(b => {
+                            b.classList.remove('bg-teal-500', 'text-white');
+                            b.classList.add('bg-white', 'text-slate-700');
+                        });
+                        btn.classList.add('bg-teal-500', 'text-white');
+                        btn.classList.remove('bg-white', 'text-slate-700');
+                        renderDeepDiveChart(btn.dataset.category);
+                    });
+                });
+            }
+            
+            function renderSwot(clinicName) {
+                const clinicData = data.swot[clinicName];
+                document.getElementById('swot-clinic-name').textContent = `${clinicName}'s SWOT Analysis`;
+                
+                const lists = {
+                    s: document.getElementById('swot-strengths'),
+                    w: document.getElementById('swot-weaknesses'),
+                    o: document.getElementById('swot-opportunities'),
+                    t: document.getElementById('swot-threats')
+                };
+                
+                for (const key in lists) {
+                    lists[key].innerHTML = '';
+                    if (clinicData && clinicData[key]) {
+                        clinicData[key].forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            lists[key].appendChild(li);
+                        });
+                    }
+                }
+            }
+            
+            function setupSwotSelector() {
+                const selectorContainer = document.getElementById('swot-clinic-selector');
+                data.clinics.forEach((clinic, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = clinic;
+                    button.dataset.clinic = clinic;
+                    button.className = 'swot-btn px-4 py-2 rounded-full font-semibold shadow';
+                    if (index === 0) {
+                        button.classList.add('bg-teal-500', 'text-white');
+                    } else {
+                        button.classList.add('bg-white', 'text-slate-700');
+                    }
+                    selectorContainer.appendChild(button);
+                });
+
+                selectorContainer.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('swot-btn')) {
+                        document.querySelectorAll('.swot-btn').forEach(btn => {
+                            btn.classList.remove('bg-teal-500', 'text-white');
+                            btn.classList.add('bg-white', 'text-slate-700');
+                        });
+                        e.target.classList.add('bg-teal-500', 'text-white');
+                        e.target.classList.remove('bg-white', 'text-slate-700');
+                        renderSwot(e.target.dataset.clinic);
+                    }
+                });
+            }
+
+            function setupIntersectionObserver() {
+                const sections = document.querySelectorAll('.section-fade-in');
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                sections.forEach(section => {
+                    observer.observe(section);
+                });
+            }
+            
+            renderOverallScoreChart();
+            renderDetailedBreakdownChart();
+            setupDeepDiveButtons();
+            renderDeepDiveChart('trust');
+            setupSwotSelector();
+            renderSwot('Fit MD');
+            setupIntersectionObserver();
+        });
+    </script>
+</body>
+</html>
